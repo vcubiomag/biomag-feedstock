@@ -1,0 +1,51 @@
+context:
+  name: fmm3dpy
+  version: 1.0.3
+
+package:
+  name: ${{ name }}
+  version: ${{ version }}
+
+source:
+  git: https://github.com/vcubiomag/FMM3D.git
+  rev: "9f4032e639fb511aebeb6652f061cf8b0536109e"
+
+build:
+  number: 0
+  script:
+    - cd python
+    - ${{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  build:
+    - ${{ compiler('c') }}
+    - ${{ compiler('cxx') }}
+    - ${{ compiler('fortran') }}
+  host:
+    - python
+    - pip
+    - meson-python
+    - numpy >=2.0.0
+  run:
+    - python>=3.9
+    - numpy >=1.26.4
+
+tests:
+  - python:
+      imports:
+        - fmm3dpy
+  - script:
+      - pytest -s python/test
+    files:
+      source:
+        - python/test/
+    requirements:
+      run:
+        - pytest
+
+about:
+  homepage: https://github.com/flatironinstitute/FMM3D
+  license: Apache-2.0
+  description: This package contains basic routines for Laplace, Helmholtz, Stokes and Maxwell fast multipole methods in three dimensions
+  repository: https://github.com/flatironinstitute/FMM3D
+  documentation: https://fmm3d.readthedocs.io/en/latest/
