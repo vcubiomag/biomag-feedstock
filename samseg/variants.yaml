@@ -1,0 +1,12 @@
+python:
+  - 3.11
+  - 3.12
+
+microarch_level:
+  - if: not(unix and x86_64)
+    then:
+      - 0
+    else:
+      - 1
+      - 3
+      # - 4

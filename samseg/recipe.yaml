@@ -1,0 +1,64 @@
+context:
+  name: samseg
+  version: 0.5a0
+  build: 0
+
+package:
+  name: ${{ name }}
+  version: ${{ version }}
+
+source:
+  git: https://github.com/vcubiomag/samseg.git
+  rev: "0554330bc06a99e812797f52120bef0f8fc7f454"
+
+build:
+  number: ${{ build|int + (microarch_level|int) * 100 }}
+  script:
+    env:
+      CMAKE_GENERATOR: Ninja
+    content: |
+      ${{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  build:
+    - if: microarch_level|int > 0
+      then: x86_64-microarch-level ==${{ microarch_level }}
+    - ${{ compiler('c') }}
+    - ${{ compiler('cxx') }}
+    - ninja
+    - cmake
+  host:
+    - python
+    - pip
+    - setuptools
+    - wheel
+    - numpy >=2.0.0
+    - pybind11
+    - libitk-devel ==5.4.4
+  run:
+    - python>=3.9
+    - scikit-learn
+    - numpy >=1.26.4
+    - surfa
+    - libitk ==5.4.4
+    # - tensorflow
+
+tests:
+  - python:
+      imports:
+        - samseg
+  - script:
+      - pytest -s tests
+    files:
+      source:
+        - tests/
+    requirements:
+      run:
+        - pytest
+
+about:
+  homepage: https://surfer.nmr.mgh.harvard.edu/fswiki/Samseg
+  license: MIT
+  description: Sequence Adaptive Multimodal SEGmentation (SAMSEG)
+  repository: https://github.com/freesurfer/samseg
+  documentation: https://surfer.nmr.mgh.harvard.edu/fswiki/Samseg
