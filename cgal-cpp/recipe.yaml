@@ -1,0 +1,44 @@
+context:
+  name: cgal-cpp
+  version: 5.6.3
+
+package:
+  name: ${{ name }}
+  version: ${{ version }}
+
+source:
+  url: https://github.com/CGAL/cgal/releases/download/v${{ version }}/CGAL-${{ version }}.tar.xz
+
+build:
+  number: 0
+  script:
+    - mkdir build
+    - cd build
+    - if: win
+      then: |
+        cmake -G Ninja -DWITH_CGAL_ImageIO=OFF -DWITH_CGAL_Qt5=OFF -DCMAKE_INSTALL_PREFIX=%LIBRARY_PREFIX% %SRC_DIR%
+      else: |
+        cmake -G Ninja -DWITH_CGAL_ImageIO=OFF -DWITH_CGAL_Qt5=OFF -DCMAKE_INSTALL_PREFIX=$PREFIX $SRC_DIR
+    - ninja install
+
+requirements:
+  build:
+    - ${{ compiler('c') }} 
+    - ${{ compiler('cxx') }} 
+    - cmake
+    - ninja
+  host:
+    - libboost-devel >=1.86.0,<1.87.0a0
+    - mpfr
+  run:
+    - libboost-devel >=1.86.0,<1.87.0a0
+    - mpfr
+    - eigen
+    - tbb-devel
+
+about:
+  homepage: http://www.cgal.org/
+  license: GPL-3.0-only
+  description: Computational Geometry Algorithms Library
+  repository: https://github.com/CGAL/cgal
+  documentation: https://www.cgal.org/documentation.html
