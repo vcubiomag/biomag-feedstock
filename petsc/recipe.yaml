@@ -1,0 +1,148 @@
+context:
+  name: petsc
+  version: "3.24.1"
+  build: 0
+
+recipe:
+  name: ${{ name }}
+  version: ${{ version }}
+
+cache:
+  source:
+    - url: https://web.cels.anl.gov/projects/petsc/download/release-snapshots/petsc-${{ version }}.tar.gz
+  requirements:
+    build:
+      - ${{ compiler('c') }}
+      - ${{ compiler('cxx') }}
+      - ${{ compiler('fortran') }}
+      - make
+      - cmake
+      - if: linux
+        then: bison
+        else: winflexbison
+      - python >=3.10,<3.14
+    host:
+      - ${{ mpi }}
+      - mkl-devel
+  build:
+    script:
+      - if: linux
+        then: |
+          python ./configure \
+            CC="mpicc" \
+            CXX="mpicxx" \
+            FC="mpifort" \
+            --COPTFLAGS="$CFLAGS -O3" \
+            --CXXOPTFLAGS="$CXXFLAGS -O3" \
+            --FOPTFLAGS="$FFLAGS -O3" \
+            --with-64-bit-indices=0 \
+            --with-debugging=0 \
+            --with-fortran-bindings=0 \
+            --with-shared-libraries \
+            --with-ssl=0 \
+            --with-x=0 \
+            --with-scalar-type=real \
+            --with-mpi=1 \
+            --with-openmp=1 \
+            --with-pthread=1 \
+            --with-blaslapack-dir=$PREFIX \
+            --with-mkl_pardiso=1 \
+            --with-hypre=1 --download-hypre=1 \
+            --with-mumps=1 --download-mumps=1 \
+            --with-scalapack-dir=$PREFIX \
+            --with-metis=1 --download-metis=1 \
+            --with-parmetis=1 --download-parmetis=1 \
+            --prefix=$PREFIX
+      - if: win
+        then: |
+          python ./configure \
+            CC="mpicc" \
+            CXX="mpicxx" \
+            FC="mpifort" \
+            --COPTFLAGS="$CFLAGS -O3" \
+            --CXXOPTFLAGS="$CXXFLAGS -O3" \
+            --FOPTFLAGS="$FFLAGS -O3" \
+            --with-64-bit-indices=0 \
+            --with-debugging=0 \
+            --with-fortran-bindings=0 \
+            --with-shared-libraries \
+            --with-ssl=0 \
+            --with-x=0 \
+            --with-scalar-type=real \
+            --with-mpi=1 \
+            --with-openmp=1 \
+            --with-pthread=1 \
+            --with-blaslapack-dir=%LIBRARY_PREFIX% \
+            --with-mkl_pardiso=1 \
+            --with-hypre=1 --download-hypre=1 \
+            --with-mumps=1 --download-mumps=1 \
+            --with-scalapack-dir=%LIBRARY_PREFIX% \
+            --with-metis=1 --download-metis=1 \
+            --with-parmetis=1 --download-parmetis=1 \
+            --prefix=%LIBRARY_PREFIX%
+      - make MAKE_NP=${CPU_COUNT}
+      - make install
+
+outputs:
+  - package:
+      name: petsc
+    requirements:
+      run:
+        - mkl
+      run_exports:
+        - ${{ pin_subpackage('petsc') }}
+        - "mpi * ${{ mpi }}"
+        - mkl
+    build:
+      number: ${{ build }}
+      string: mkl_real_h${{ hash }}_${{ build }}
+      skip: osx or (not x86_64)
+      files:
+        exclude:
+          - share/petsc/examples/
+          - share/petsc/datafiles/
+          - lib/pkgconfig/PETSc.pc
+  - package:
+      name: petsc4py
+    requirements:
+      build:
+        - ${{ compiler('c') }}
+      host:
+        - python
+        - pip
+        - cython
+        - setuptools
+        - numpy >=2.0.0
+        - petsc
+      run:
+        - petsc
+        - numpy >=1.26.4
+    build:
+      skip: osx or (not x86_64)
+      script:
+        content:
+          - cd src/binding/petsc4py
+          - ${{ PYTHON }} conf/cythonize.py
+          - ${{ PYTHON }} -m pip install . --no-deps -vv
+        env:
+          PETSC_DIR: "$PREFIX"
+      files:
+        include:
+          - lib/python*/site-packages/
+        exclude:
+          - "**/*.pxd"
+          - "**/*.h"
+          - "**/*.pyi"
+          - "**/*.i"
+          - "**/*.typed"
+    tests:
+      - python:
+          imports:
+            - petsc4py
+            - petsc4py.PETSc
+      - script:
+          - cd src/binding/petsc4py/test/
+          - python -m unittest
+        files:
+          source:
+            - src/binding/petsc4py/test/
