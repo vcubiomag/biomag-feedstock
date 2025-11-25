@@ -9,7 +9,7 @@ package:
 
 source:
   git: https://github.com/simnibs/simnibs.git
-  rev: "95ca28e236178a60975ba80df40fdf4a32b2b82e"
+  rev: "22cbbf2fea0f654b86f7d4805c4febb191ab641f"
 
 build:
   number: ${{ build|int + (microarch_level|int) * 100 }}
