@@ -9,7 +9,7 @@ package:
 
 source:
   git: https://github.com/vcubiomag/samseg.git
-  rev: "0554330bc06a99e812797f52120bef0f8fc7f454"
+  rev: "1168a94be8ca21287fb00ac6f8054c4b368674da"
 
 build:
   number: ${{ build|int + (microarch_level|int) * 100 }}
@@ -41,14 +41,13 @@ requirements:
     - numpy >=1.26.4
     - surfa
     - libitk ==5.4.4
-    # - tensorflow
 
 tests:
   - python:
       imports:
         - samseg
   - script:
-      - pytest -s tests
+      - pytest -v tests
     files:
       source:
         - tests/
