@@ -1,0 +1,79 @@
+context:
+  name: simnibs
+  version: 4.5.0
+  build: 0
+
+package:
+  name: ${{ name }}
+  version: ${{ version }}
+
+source:
+  git: https://github.com/simnibs/simnibs.git
+  rev: "95ca28e236178a60975ba80df40fdf4a32b2b82e"
+
+build:
+  number: ${{ build|int + (microarch_level|int) * 100 }}
+  script:
+    env:
+      CMAKE_GENERATOR: Ninja
+    content: |
+      ${{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  build:
+    - if: microarch_level|int > 0
+      then: x86_64-microarch-level ==${{ microarch_level }}
+    - ${{ compiler('c') }}
+    - ${{ compiler('cxx') }}
+    - cmake
+    - ninja
+  host:
+    - python
+    - pip
+    - scikit-build-core
+    - cython
+    - numpy >=1.26.4,<2
+    - cgal-cpp >=5.6.3,<6
+    - eigen
+    - tbb-devel
+  run:
+    - numpy >=1.26.4,<2
+    - scipy
+    - nibabel
+    - h5py
+    - cgal-cpp >=5.6.3,<6
+    - jsonschema
+    - fmm3dpy ==1.0.3
+    - if: linux or win
+      then: "petsc4py *mkl_real_*"
+      else: petsc4py
+    - pygpc
+    - samseg
+    - matplotlib-base
+    - numba
+    - pillow
+    - pyqt
+    - requests
+    - if: (win or linux) and x86_64
+      then: mkl
+
+tests:
+  - python:
+      imports:
+        - simnibs
+  - script:
+      - pytest -v tests
+    files:
+      source:
+        - tests/
+    requirements:
+      run:
+        - pytest
+        - mock
+
+about:
+  homepage: http://www.simnibs.org/
+  license: GPL-3.0-only
+  description: Simulation of Non-Invasive Brain Stimulation
+  repository: https://github.com/simnibs/simnibs
+  documentation: https://simnibs.github.io/simnibs/build/html/index.html
