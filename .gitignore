@@ -1,0 +1,9 @@
+# pixi environments
+.pixi/*
+!.pixi/config.toml
+
+output/
+
+.DS_Store
+.idea
+.claude

@@ -1,0 +1,9 @@
+[workspace]
+authors = ["Sriman Achanta <68172138+srimanachanta@users.noreply.github.com>"]
+channels = ["conda-forge"]
+name = "biomag-feedstock"
+platforms = ["osx-arm64", "linux-64", "win-64"]
+version = "0.1.0"
+
+[dependencies]
+rattler-build = ">=0.61.4,<0.62"
