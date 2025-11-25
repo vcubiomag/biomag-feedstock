@@ -1,0 +1,56 @@
+context:
+  name: pygpc
+  version: 0.4.3
+
+package:
+  name: ${{ name }}
+  version: ${{ version }}
+
+source:
+  git: https://github.com/pygpc-polynomial-chaos/pygpc.git
+  rev: "dd57cefc1536409e94409bc13e4e2c2303ec3ed7"
+  patches:
+    - patches/openmp_link_fix.patch
+
+build:
+  number: 0
+  script:
+    - ${{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  build:
+    - ${{ compiler('c') }} 
+    - ${{ compiler('cxx') }} 
+  host:
+    - python
+    - pip
+    - setuptools
+    - wheel
+    - numpy >=2.0.0
+  run:
+    - numpy >=1.26.4
+    - scipy
+    - scikit-learn
+    - h5py
+    - tqdm
+    - pandas
+    - matplotlib-base
+    - seaborn-base
+
+tests:
+  - python:
+      imports:
+        - pygpc
+  - script:
+      - cd tests
+      - python -m unittest
+    files:
+      source:
+        - tests/
+
+about:
+  homepage: https://github.com/pygpc-polynomial-chaos/pygpc
+  license: GPL-3.0-only
+  description: A sensitivity and uncertainty analysis toolbox for Python
+  repository: hhttps://github.com/pygpc-polynomial-chaos/pygpc
+  documentation: https://pygpc.readthedocs.io/en/latest/

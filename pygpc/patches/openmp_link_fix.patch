@@ -1,0 +1,13 @@
+diff --git a/setup.py b/setup.py
+index 6839cd7..3a4d74e 100755
+--- a/setup.py
++++ b/setup.py
+@@ -26,7 +26,7 @@ from setuptools import setup, find_packages, Extension
+ # along with this program.  If not, see <https://www.gnu.org/licenses/>
+ 
+ openmp_compile_args = ["-fopenmp"]
+-openmp_link_args = ["-lgomp"]
++openmp_link_args = ["-fopenmp"]
+ pygpc_extensions_src_file_path = [
+     os.path.join("pckg", "pygpc_extensions", "src", "pygpc_extensions.cpp")
+ ]
