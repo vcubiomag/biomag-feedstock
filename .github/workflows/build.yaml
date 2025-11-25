@@ -31,24 +31,16 @@ jobs:
       - name: Build packages
         shell: bash
         run: |
-          pixi run rattler-build build \
-            --recipe surfa/recipe.yaml \
-            --recipe samseg/recipe.yaml \
-            --recipe cgal-cpp/recipe.yaml \
-            --recipe fmm3dpy/recipe.yaml \
-            --recipe petsc/recipe.yaml \
-            --recipe pygpc/recipe.yaml \
-            --recipe simnibs/recipe.yaml \
-            --skip-existing=all --target-platform=${{ matrix.target-platform }} \
-            -c https://prefix.dev/vcubiomag -c conda-forge --experimental
-      - name: Upload packages
-        shell: bash
-        run: |
-          shopt -s nullglob
-          EXIT_CODE=0
-          for pkg in $(find output -type f \( -name "*.conda" -o -name "*.tar.bz2" \) ); do
-            if ! rattler-build upload prefix -c vcubiomag "${pkg}"; then
-              EXIT_CODE=1
-            fi
-          done
-          exit $EXIT_CODE
+          pixi run rattler-build build --recipe-dir . \
+            --target-platform=${{ matrix.target-platform }} --experimental --test skip --variant python=3.12
+      # - name: Upload packages
+      #   shell: bash
+      #   run: |
+      #     shopt -s nullglob
+      #     EXIT_CODE=0
+      #     for pkg in $(find output -type f \( -name "*.conda" -o -name "*.tar.bz2" \) ); do
+      #       if ! rattler-build upload prefix -c vcubiomag "${pkg}"; then
+      #         EXIT_CODE=1
+      #       fi
+      #     done
+      #     exit $EXIT_CODE
