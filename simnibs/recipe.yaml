@@ -44,9 +44,7 @@ requirements:
     - cgal-cpp >=5.6.3,<6
     - jsonschema
     - fmm3dpy ==1.0.3
-    - if: linux or win
-      then: "petsc4py *mkl_real_*"
-      else: petsc4py
+    - petsc4py
     - pygpc
     - samseg
     - matplotlib-base
