@@ -9,7 +9,7 @@ package:
 
 source:
   git: https://github.com/simnibs/simnibs.git
-  rev: "5fa8de43d05a56bd87577b4015ee8c31eefb0807"
+  rev: "6570c658504397ed6bc08cf665ea9a07a311e12d"
 
 build:
   number: ${{ build|int + (microarch_level|int) * 100 }}
@@ -32,7 +32,7 @@ requirements:
     - pip
     - scikit-build-core
     - cython
-    - numpy >=2.0.0
+    - numpy >=1.26.4,<2
     - cgal-cpp >=5.6.3,<6
     - eigen
     - tbb-devel
