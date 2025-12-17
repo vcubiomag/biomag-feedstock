@@ -37,7 +37,7 @@ requirements:
     - eigen
     - tbb-devel
   run:
-    - numpy >=1.26.4
+    - numpy >=1.26.4,<2
     - scipy
     - nibabel
     - h5py
@@ -51,6 +51,7 @@ requirements:
     - numba
     - pillow
     - pyqt
+    - pyopengl
     - requests
     - if: (win or linux) and x86_64
       then: mkl
