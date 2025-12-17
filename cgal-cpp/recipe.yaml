@@ -39,6 +39,6 @@ requirements:
 about:
   homepage: http://www.cgal.org/
   license: GPL-3.0-only
-  description: Computational Geometry Algorithms Library
+  summary: Computational Geometry Algorithms Library
   repository: https://github.com/CGAL/cgal
   documentation: https://www.cgal.org/documentation.html

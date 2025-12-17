@@ -58,6 +58,6 @@ tests:
 about:
   homepage: https://surfer.nmr.mgh.harvard.edu/fswiki/Samseg
   license: MIT
-  description: Sequence Adaptive Multimodal SEGmentation (SAMSEG)
+  summary: Sequence Adaptive Multimodal SEGmentation (SAMSEG)
   repository: https://github.com/freesurfer/samseg
   documentation: https://surfer.nmr.mgh.harvard.edu/fswiki/Samseg

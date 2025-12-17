@@ -72,6 +72,6 @@ tests:
 about:
   homepage: http://www.simnibs.org/
   license: GPL-3.0-only
-  description: Simulation of Non-Invasive Brain Stimulation
+  summary: Simulation of Non-Invasive Brain Stimulation
   repository: https://github.com/simnibs/simnibs
   documentation: https://simnibs.github.io/simnibs/build/html/index.html

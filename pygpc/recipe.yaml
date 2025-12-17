@@ -51,6 +51,6 @@ tests:
 about:
   homepage: https://github.com/pygpc-polynomial-chaos/pygpc
   license: GPL-3.0-only
-  description: A sensitivity and uncertainty analysis toolbox for Python
+  summary: A sensitivity and uncertainty analysis toolbox for Python
   repository: hhttps://github.com/pygpc-polynomial-chaos/pygpc
   documentation: https://pygpc.readthedocs.io/en/latest/

@@ -46,6 +46,6 @@ tests:
 about:
   homepage: https://github.com/flatironinstitute/FMM3D
   license: Apache-2.0
-  description: This package contains basic routines for Laplace, Helmholtz, Stokes and Maxwell fast multipole methods in three dimensions
+  summary: This package contains basic routines for Laplace, Helmholtz, Stokes and Maxwell fast multipole methods in three dimensions
   repository: https://github.com/flatironinstitute/FMM3D
   documentation: https://fmm3d.readthedocs.io/en/latest/
