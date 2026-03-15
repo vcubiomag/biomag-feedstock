@@ -1,6 +1,6 @@
 context:
   name: pygpc
-  version: 0.4.3
+  version: 0.4.4
 
 package:
   name: ${{ name }}
@@ -8,7 +8,7 @@ package:
 
 source:
   git: https://github.com/pygpc-polynomial-chaos/pygpc.git
-  rev: "dd57cefc1536409e94409bc13e4e2c2303ec3ed7"
+  rev: "51c975354b8c4db0c579cd30b284d5bdc7b3f7f7"
   patches:
     - patches/openmp_link_fix.patch
 
@@ -20,15 +20,19 @@ build:
 requirements:
   build:
     - ${{ compiler('c') }} 
-    - ${{ compiler('cxx') }} 
+    - ${{ compiler('cxx') }}
+    - if: osx
+      then: llvm-openmp
+    - if: linux
+      then: libgomp
   host:
     - python
     - pip
     - setuptools
-    - wheel
     - numpy >=2.0.0
   run:
-    - numpy >=1.26.4
+    - python
+    - numpy
     - scipy
     - scikit-learn
     - h5py

@@ -1,6 +1,6 @@
 context:
   name: fmm3dpy
-  version: 1.0.3
+  version: 2.1.0
 
 package:
   name: ${{ name }}
@@ -8,7 +8,7 @@ package:
 
 source:
   git: https://github.com/vcubiomag/FMM3D.git
-  rev: "9f4032e639fb511aebeb6652f061cf8b0536109e"
+  rev: "976f782703f04060daf33c11491949bcc0800874"
 
 build:
   number: 0
@@ -27,8 +27,8 @@ requirements:
     - meson-python
     - numpy >=2.0.0
   run:
-    - python>=3.9
-    - numpy >=1.26.4
+    - python
+    - numpy
 
 tests:
   - python:

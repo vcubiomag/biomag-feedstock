@@ -1,6 +1,8 @@
 python:
   - 3.11
   - 3.12
+  - 3.13
+  - 3.14
 
 microarch_level:
   - if: not(unix and x86_64)

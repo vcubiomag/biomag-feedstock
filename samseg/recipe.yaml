@@ -31,16 +31,15 @@ requirements:
     - python
     - pip
     - setuptools
-    - wheel
     - numpy >=2.0.0
     - pybind11
-    - libitk-devel ==5.4.4
+    - libitk-devel >=5.4.5
   run:
-    - python>=3.9
+    - python
     - scikit-learn
-    - numpy >=1.26.4
-    - surfa
-    - libitk ==5.4.4
+    - numpy
+    - surfa >=0.6.4
+    - libitk >=5.4.5
 
 tests:
   - python:

@@ -3,7 +3,7 @@ context:
   version: 5.6.3
 
 package:
-  name: ${{ name }}
+  name: ${{ name|lower }}
   version: ${{ version }}
 
 source:
@@ -11,15 +11,6 @@ source:
 
 build:
   number: 0
-  script:
-    - mkdir build
-    - cd build
-    - if: win
-      then: |
-        cmake -G Ninja -DWITH_CGAL_ImageIO=OFF -DWITH_CGAL_Qt5=OFF -DCMAKE_INSTALL_PREFIX=%LIBRARY_PREFIX% %SRC_DIR%
-      else: |
-        cmake -G Ninja -DWITH_CGAL_ImageIO=OFF -DWITH_CGAL_Qt5=OFF -DCMAKE_INSTALL_PREFIX=$PREFIX $SRC_DIR
-    - ninja install
 
 requirements:
   build:
@@ -28,13 +19,14 @@ requirements:
     - cmake
     - ninja
   host:
-    - libboost-devel >=1.86.0,<1.87.0a0
-    - mpfr
-  run:
-    - libboost-devel >=1.86.0,<1.87.0a0
+    - libboost-devel
     - mpfr
     - eigen
-    - tbb-devel
+    - eigen-abi-devel
+  run:
+    - libboost-devel
+    - mpfr
+    - eigen
 
 about:
   homepage: http://www.cgal.org/

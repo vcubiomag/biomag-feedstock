@@ -1,148 +1,131 @@
+schema_version: 1
+
 context:
   name: petsc
-  version: "3.24.1"
+  version: "3.24.5"
   build: 0
+  mpi: ${{ mpi | default('mpich') }}
+  scalar: ${{ scalar | default('real') }}
+  build_prefix: mkl_${{ scalar }}
 
 recipe:
   name: ${{ name }}
   version: ${{ version }}
 
-cache:
-  source:
-    - url: https://web.cels.anl.gov/projects/petsc/download/release-snapshots/petsc-${{ version }}.tar.gz
-  requirements:
-    build:
-      - ${{ compiler('c') }}
-      - ${{ compiler('cxx') }}
-      - ${{ compiler('fortran') }}
-      - make
-      - cmake
-      - if: linux
-        then: bison
-        else: winflexbison
-      - python >=3.10,<3.14
-    host:
-      - ${{ mpi }}
-      - mkl-devel
-  build:
-    script:
-      - if: linux
-        then: |
-          python ./configure \
-            CC="mpicc" \
-            CXX="mpicxx" \
-            FC="mpifort" \
-            --COPTFLAGS="$CFLAGS -O3" \
-            --CXXOPTFLAGS="$CXXFLAGS -O3" \
-            --FOPTFLAGS="$FFLAGS -O3" \
-            --with-64-bit-indices=0 \
-            --with-debugging=0 \
-            --with-fortran-bindings=0 \
-            --with-shared-libraries \
-            --with-ssl=0 \
-            --with-x=0 \
-            --with-scalar-type=real \
-            --with-mpi=1 \
-            --with-openmp=1 \
-            --with-pthread=1 \
-            --with-blaslapack-dir=$PREFIX \
-            --with-mkl_pardiso=1 \
-            --with-hypre=1 --download-hypre=1 \
-            --with-mumps=1 --download-mumps=1 \
-            --with-scalapack-dir=$PREFIX \
-            --with-metis=1 --download-metis=1 \
-            --with-parmetis=1 --download-parmetis=1 \
-            --prefix=$PREFIX
-      - if: win
-        then: |
-          python ./configure \
-            CC="mpicc" \
-            CXX="mpicxx" \
-            FC="mpifort" \
-            --COPTFLAGS="$CFLAGS -O3" \
-            --CXXOPTFLAGS="$CXXFLAGS -O3" \
-            --FOPTFLAGS="$FFLAGS -O3" \
-            --with-64-bit-indices=0 \
-            --with-debugging=0 \
-            --with-fortran-bindings=0 \
-            --with-shared-libraries \
-            --with-ssl=0 \
-            --with-x=0 \
-            --with-scalar-type=real \
-            --with-mpi=1 \
-            --with-openmp=1 \
-            --with-pthread=1 \
-            --with-blaslapack-dir=%LIBRARY_PREFIX% \
-            --with-mkl_pardiso=1 \
-            --with-hypre=1 --download-hypre=1 \
-            --with-mumps=1 --download-mumps=1 \
-            --with-scalapack-dir=%LIBRARY_PREFIX% \
-            --with-metis=1 --download-metis=1 \
-            --with-parmetis=1 --download-parmetis=1 \
-            --prefix=%LIBRARY_PREFIX%
-      - make MAKE_NP=${CPU_COUNT}
-      - make install
+source:
+  url: https://web.cels.anl.gov/projects/petsc/download/release-snapshots/petsc-${{ version }}.tar.gz
 
 outputs:
+  - staging:
+      name: petsc-build
+    requirements:
+      build:
+        - ${{ compiler('c') }}
+        - ${{ compiler('cxx') }}
+        - if: unix
+          then:
+            - ${{ compiler('fortran') }}
+        - make
+        - cmake
+        - pkg-config
+        - python 3.12.*
+        - if: unix
+          then:
+            - bison
+            - diffutils
+            - gnuconfig
+        - if: mpi == 'openmpi' and build_platform != target_platform
+          then: ${{ mpi }}
+      host:
+        - ${{ mpi }}
+        - mkl-devel
+        - yaml
+        - if: scalar == 'real'
+          then:
+            - hypre
+        - libhwloc
+        - metis
+        - parmetis
+        - libptscotch
+        - scalapack
+        - libscotch
+        - libscotch * int32_*
+        - mumps-mpi
+        - hdf5
+        - hdf5 * mpi_${{ mpi }}_*
+        - fftw
+        - fftw * mpi_${{ mpi }}_*
+        - superlu
+        - superlu_dist
+        - libamd
+        - libcholmod
+        - libklu
+        - libspqr
+        - libumfpack
+    build:
+      script: build
+
   - package:
       name: petsc
-    requirements:
-      run:
-        - mkl
-      run_exports:
-        - ${{ pin_subpackage('petsc') }}
-        - "mpi * ${{ mpi }}"
-        - mkl
+    inherit: petsc-build
     build:
       number: ${{ build }}
-      string: mkl_real_h${{ hash }}_${{ build }}
-      skip: osx or (not x86_64)
+      string: ${{ build_prefix }}_h${{ hash }}_${{ build }}
+      skip: osx
+      variant:
+        down_prioritize_variant: ${{ 1 if scalar == "complex" else 0 }}
       files:
         exclude:
           - share/petsc/examples/
           - share/petsc/datafiles/
           - lib/pkgconfig/PETSc.pc
+    requirements:
+      run:
+        - mkl
+      run_exports:
+        weak:
+          - ${{ pin_subpackage('petsc', upper_bound='x.x') }}
+          - petsc * ${{ build_prefix }}_*
+
   - package:
       name: petsc4py
+    inherit: petsc-build
+    build:
+      number: ${{ build }}
+      skip: osx
+      script: build_petsc4py
     requirements:
       build:
         - ${{ compiler('c') }}
+        - if: build_platform != target_platform
+          then:
+            - python
+            - cython
+            - cross-python_${{ target_platform }}
+            - numpy
+            - if: mpi == 'openmpi'
+              then: ${{ mpi }}
       host:
         - python
-        - pip
         - cython
+        - pip
         - setuptools
         - numpy >=2.0.0
-        - petsc
+        - ${{ mpi }}
+        - petsc ==${{ version }}
       run:
-        - petsc
-        - numpy >=1.26.4
-    build:
-      skip: osx or (not x86_64)
-      script:
-        content:
-          - cd src/binding/petsc4py
-          - ${{ PYTHON }} conf/cythonize.py
-          - ${{ PYTHON }} -m pip install . --no-deps -vv
-        env:
-          PETSC_DIR: "$PREFIX"
-      files:
-        include:
-          - lib/python*/site-packages/
-        exclude:
-          - "**/*.pxd"
-          - "**/*.h"
-          - "**/*.pyi"
-          - "**/*.i"
-          - "**/*.typed"
+        - python
+        - numpy
     tests:
       - python:
           imports:
             - petsc4py
             - petsc4py.PETSc
-      - script:
-          - cd src/binding/petsc4py/test/
-          - python -m unittest
-        files:
-          source:
-            - src/binding/petsc4py/test/
+
+about:
+  summary: PETSc with MKL and Intel Pardiso support
+  license: BSD-2-Clause
+  license_file: LICENSE
+  homepage: https://petsc.org/
+  repository: https://gitlab.com/petsc/petsc
+  documentation: https://petsc.org/release/docs/manual/
