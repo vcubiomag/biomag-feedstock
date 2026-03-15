@@ -43,9 +43,7 @@ python ./configure \
   --with-clib-autodetect=0 \
   --with-cxxlib-autodetect=0 \
   --with-fortranlib-autodetect=0 \
-  --with-64-bit-indices=0 \
   --with-debugging=0 \
-  --with-fortran-bindings=0 \
   --with-shared-libraries \
   --with-ssl=0 \
   --with-x=0 \
@@ -57,7 +55,8 @@ python ./configure \
   --with-mkl_pardiso=1 \
   --with-yaml=1 \
   --with-hdf5=1 \
-  --with-fftw=1 \
+  --with-fftw-include=$PREFIX/include \
+  --with-fftw-lib=[-L$PREFIX/lib,-lfftw3_mpi,-lfftw3] \
   --with-hwloc=1 \
   --with-hypre=${with_hypre} \
   --with-metis=1 \
@@ -110,6 +109,22 @@ make install
 # Cleanup
 rm -f ${PREFIX}/lib/petsc/conf/configure-hash
 find $PREFIX/lib/petsc -name '*.pyc' -delete
+
+# Strip non-deterministic content (timestamps, machine info) from installed files
+# to ensure reproducible package hashes across builds.
+# These files contain multiline string literals with build dates, hostnames, and
+# system info that change every build. Overwrite with empty stubs.
+if [ -f "${PREFIX}/include/petscmachineinfo.h" ]; then
+  echo "Stripping petscmachineinfo.h"
+  echo 'static const char *petscmachineinfo = "";' > "${PREFIX}/include/petscmachineinfo.h"
+fi
+if [ -f "${PREFIX}/include/petscconfiginfo.h" ]; then
+  echo "Stripping petscconfiginfo.h"
+  echo 'static const char *petscconfigureruntime = "";' > "${PREFIX}/include/petscconfiginfo.h"
+fi
+
+# Remove the reconfigure script (contains build-specific paths and timestamps)
+rm -f ${PREFIX}/lib/petsc/conf/reconfigure-*.py
 
 # Remove build prefix references from installed files
 for f in $(grep -l "${BUILD_PREFIX}/bin/" -R "${PREFIX}/lib/petsc") "$PREFIX/lib/pkgconfig/PETSc.pc"; do

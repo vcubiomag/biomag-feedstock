@@ -19,7 +19,7 @@ build:
 
 requirements:
   build:
-    - ${{ compiler('c') }} 
+    - ${{ compiler('c') }}
     - ${{ compiler('cxx') }}
     - if: osx
       then: llvm-openmp
@@ -56,5 +56,5 @@ about:
   homepage: https://github.com/pygpc-polynomial-chaos/pygpc
   license: GPL-3.0-only
   summary: A sensitivity and uncertainty analysis toolbox for Python
-  repository: hhttps://github.com/pygpc-polynomial-chaos/pygpc
+  repository: https://github.com/pygpc-polynomial-chaos/pygpc
   documentation: https://pygpc.readthedocs.io/en/latest/

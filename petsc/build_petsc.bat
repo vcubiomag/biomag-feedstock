@@ -16,8 +16,6 @@ python configure ^
   --with-clib-autodetect=0 ^
   --with-cxxlib-autodetect=0 ^
   --with-fortranlib-autodetect=0 ^
-  --with-fortran-bindings=0 ^
-  --with-64-bit-indices=0 ^
   --with-debugging=0 ^
   --with-shared-libraries=1 ^
   --with-ssl=0 ^

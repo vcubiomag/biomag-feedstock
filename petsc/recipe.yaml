@@ -22,18 +22,14 @@ outputs:
       build:
         - ${{ compiler('c') }}
         - ${{ compiler('cxx') }}
-        - if: unix
-          then:
-            - ${{ compiler('fortran') }}
+        - ${{ compiler('fortran') }}
         - make
         - cmake
         - pkg-config
         - python 3.12.*
-        - if: unix
-          then:
-            - bison
-            - diffutils
-            - gnuconfig
+        - bison
+        - diffutils
+        - gnuconfig
         - if: mpi == 'openmpi' and build_platform != target_platform
           then: ${{ mpi }}
       host:
@@ -63,7 +59,11 @@ outputs:
         - libspqr
         - libumfpack
     build:
-      script: build
+      script:
+        file: build_petsc
+        env:
+          scalar: ${{ scalar }}
+          mpi: ${{ mpi }}
 
   - package:
       name: petsc
@@ -93,7 +93,13 @@ outputs:
     build:
       number: ${{ build }}
       skip: osx
-      script: build_petsc4py
+      script:
+        - if: unix
+          then: export PETSC_DIR=$PREFIX
+          else: set PETSC_DIR=%LIBRARY_PREFIX%
+        - cd src/binding/petsc4py
+        - ${{ PYTHON }} conf/cythonize.py
+        - ${{ PYTHON }} -m pip install . --no-deps -vv
     requirements:
       build:
         - ${{ compiler('c') }}
@@ -112,7 +118,7 @@ outputs:
         - setuptools
         - numpy >=2.0.0
         - ${{ mpi }}
-        - petsc ==${{ version }}
+        - ${{ pin_subpackage('petsc', upper_bound='x.x') }}
       run:
         - python
         - numpy
@@ -121,6 +127,11 @@ outputs:
           imports:
             - petsc4py
             - petsc4py.PETSc
+      - script:
+          - python src/binding/petsc4py/test/runtests.py
+        files:
+          source:
+            - src/binding/petsc4py/test
 
 about:
   summary: PETSc with MKL and Intel Pardiso support
