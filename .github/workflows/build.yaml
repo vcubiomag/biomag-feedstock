@@ -13,7 +13,7 @@ jobs:
         include:
           - os: ubuntu-latest
             target-platform: linux-64
-          - os: windows-latest
+          - os: windows-2022
             target-platform: win-64
           - os: macos-15
             target-platform: osx-arm64
