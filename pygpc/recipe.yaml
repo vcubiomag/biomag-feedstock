@@ -29,10 +29,10 @@ requirements:
     - python
     - pip
     - setuptools
-    - numpy >=2.0.0
+    - numpy >=1.26,<2
   run:
     - python
-    - numpy
+    - numpy <2
     - scipy
     - scikit-learn
     - h5py
