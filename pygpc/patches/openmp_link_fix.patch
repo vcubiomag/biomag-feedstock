@@ -11,7 +11,6 @@ index 6839cd7..3a4d74e 100755
 +    openmp_compile_args = ["/openmp"]
 +    openmp_link_args = []
 +elif sys.platform == "darwin":
-+    # macOS Clang usually needs specific header/lib paths for OpenMP
 +    openmp_compile_args = ["-Xpreprocessor", "-fopenmp"]
 +    openmp_link_args = ["-lomp"]
 +else:

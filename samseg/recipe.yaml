@@ -9,50 +9,49 @@ package:
 
 source:
   git: https://github.com/vcubiomag/samseg.git
-  rev: "1168a94be8ca21287fb00ac6f8054c4b368674da"
+  rev: "d11d9fafcc2def6f387443d7ba8e80a44a4425f6"
 
 build:
   number: ${{ build|int + (microarch_level|int) * 100 }}
   script:
-    env:
-      CMAKE_GENERATOR: Ninja
-    content: |
-      ${{ PYTHON }} -m pip install . --no-deps -vv
+    - ${{ PYTHON }} -m pip install . --no-deps -vv
 
 requirements:
   build:
     - if: microarch_level|int > 0
       then: x86_64-microarch-level ==${{ microarch_level }}
-    - ${{ compiler('c') }}
     - ${{ compiler('cxx') }}
-    - ninja
     - cmake
   host:
     - python
     - pip
-    - setuptools
+    - scikit-build-core
     - numpy >=2.0.0
     - pybind11
     - libitk-devel >=5.4.5
+    - libzlib
   run:
     - python
+    - surfa >=0.6.4
     - scikit-learn
     - numpy
-    - surfa >=0.6.4
+    - numba
     - libitk >=5.4.5
 
 tests:
   - python:
       imports:
         - samseg
-  - script:
-      - pytest -v tests
-    files:
-      source:
-        - tests/
-    requirements:
-      run:
-        - pytest
+  # Tensorflow not availble on Python@3.14
+  # - script:
+  #     - pytest -v tests
+  #   files:
+  #     source:
+  #       - tests/
+  #   requirements:
+  #     run:
+  #       - pytest
+  #       - tensorflow
 
 about:
   homepage: https://surfer.nmr.mgh.harvard.edu/fswiki/Samseg
