@@ -35,7 +35,7 @@ jobs:
       - name: Build packages
         shell: bash
         run: |
-          rattler-build build --recipe surfa --recipe samseg --recipe pygpc --recipe hypre --recipe petsc --recipe fmm3dpy --recipe cgal-cpp \
+          rattler-build build --recipe surfa --recipe samseg --recipe pygpc --recipe fmm3dpy --recipe cgal-cpp \
             --variant-config conda_build_config.yaml --skip-existing=all --experimental \
             -c conda-forge -c https://prefix.dev/vcubiomag
 
