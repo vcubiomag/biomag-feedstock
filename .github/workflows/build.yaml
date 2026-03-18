@@ -13,7 +13,7 @@ jobs:
         include:
           - os: ubuntu-latest
             target-platform: linux-64
-          - os: windows-2022
+          - os: windows-latest
             target-platform: win-64
           - os: macos-15
             target-platform: osx-arm64
@@ -27,14 +27,28 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v6
 
+      - name: Setup VisualStudio BuildTools
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $installer = "C:\Program Files (x86)\Microsoft Visual Studio\Installer\setup.exe"
+          Start-Process -FilePath $installer -Wait -ArgumentList `
+            "modify", `
+            "--installPath", "C:\Program Files\Microsoft Visual Studio\2022\Enterprise", `
+            "--add", "Microsoft.VisualStudio.Component.VC.v141.x86.x64", `
+            "--quiet", "--norestart"
+
       - name: Setup rattler-build
         uses: prefix-dev/rattler-build-action@v0.2.36
         with:
           setup-only: true
       
       - name: Build packages
+        shell: bash
         run: |
-          rattler-build build --recipe surfa --recipe samseg --recipe cgal-cpp --recipe fmm3dpy --recipe petsc --recipe pygpc --experimental
+          rattler-build build --recipe-dir . \
+            --skip-existing=all --experimental \
+            -c conda-forge -c https://prefix.dev/vcubiomag
 
       - name: Upload packages
         run: |
