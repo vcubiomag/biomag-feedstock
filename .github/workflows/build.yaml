@@ -46,7 +46,7 @@ jobs:
       - name: Build packages
         shell: bash
         run: |
-          rattler-build build --recipe-dir . \
+          rattler-build build --recipe surfa --recipe samseg --recipe pygpc --recipe petsc --recipe fmm3dpy --recipe cgal-cpp \
             --skip-existing=all --experimental \
             -c conda-forge -c https://prefix.dev/vcubiomag
 
