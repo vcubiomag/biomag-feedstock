@@ -8,7 +8,7 @@ package:
 
 source:
   git: https://github.com/vcubiomag/FMM3D.git
-  rev: "976f782703f04060daf33c11491949bcc0800874"
+  rev: "aa036ab08462ac6bfdb13bde6945b5bbedabddfa"
 
 build:
   number: 0

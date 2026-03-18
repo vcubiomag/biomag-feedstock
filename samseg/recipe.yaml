@@ -1,6 +1,6 @@
 context:
   name: samseg
-  version: 0.5a0
+  version: 0.6a0.dev0
   build: 0
 
 package:
@@ -29,7 +29,7 @@ requirements:
     - numpy >=2.0.0
     - pybind11
     - libitk-devel >=5.4.5
-    - libzlib
+    - zlib
   run:
     - python
     - surfa >=0.6.4
@@ -37,6 +37,7 @@ requirements:
     - numpy
     - numba
     - libitk >=5.4.5
+    - libzlib
 
 tests:
   - python:
