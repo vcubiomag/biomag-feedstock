@@ -32,7 +32,7 @@ requirements:
     - zlib
   run:
     - python
-    - surfa >=0.6.4
+    - surfa >=0.6.4.dev0
     - scikit-learn
     - numpy
     - numba
