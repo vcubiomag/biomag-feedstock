@@ -27,17 +27,6 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v6
 
-      - name: Setup VisualStudio BuildTools
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          $installer = "C:\Program Files (x86)\Microsoft Visual Studio\Installer\setup.exe"
-          Start-Process -FilePath $installer -Wait -ArgumentList `
-            "modify", `
-            "--installPath", "C:\Program Files\Microsoft Visual Studio\2022\Enterprise", `
-            "--add", "Microsoft.VisualStudio.Component.VC.v141.x86.x64", `
-            "--quiet", "--norestart"
-
       - name: Setup rattler-build
         uses: prefix-dev/rattler-build-action@v0.2.36
         with:

@@ -19,17 +19,3 @@ fortran_compiler:
     then: gfortran
   - if: win
     then: vs2022
-
-python:
-  - 3.11
-  - 3.12
-  - 3.13
-  - 3.14
-
-mpi:
-  - mpich
-  - openmpi
-
-scalar:
-  - real
-  - complex
