@@ -40,6 +40,7 @@ jobs:
             -c conda-forge -c https://prefix.dev/vcubiomag
 
       - name: Upload packages
+        shell: bash
         run: |
           for pkg in $(find output -type f \( -name "*.conda" -o -name "*.tar.bz2" \) ); do
             echo "Uploading ${pkg}"
