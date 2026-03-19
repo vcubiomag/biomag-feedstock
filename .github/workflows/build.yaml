@@ -33,35 +33,36 @@ jobs:
         with:
           packages: |
             python3
+            make
 
       - name: Set Cygwin root
         if: runner.os == 'Windows'
         shell: bash
-        run: echo "CYGWIN_ROOT=C:\\cygwin64" >> "$GITHUB_ENV"
+        run: echo "CYGWIN_ROOT=C:\\cygwin" >> "$GITHUB_ENV"
 
       - name: Setup ifort Compiler
         uses: fortran-lang/setup-fortran@v1
         if: runner.os == 'Windows'
         with:
           compiler: intel-classic
-          version: 2021.12
+          version: '2021.10'
 
-      - name: Setup rattler-build
-        uses: prefix-dev/rattler-build-action@v0.2.36
-        with:
-          setup-only: true
+      # - name: Setup rattler-build
+      #   uses: prefix-dev/rattler-build-action@v0.2.36
+      #   with:
+      #     setup-only: true
       
-      - name: Build packages
-        shell: bash
-        run: |
-          rattler-build build --recipe surfa --recipe samseg --recipe pygpc --recipe cgal-cpp --recipe fmm3dpy \
-            --variant-config conda_build_config.yaml --skip-existing=all --experimental \
-            -c conda-forge -c https://prefix.dev/vcubiomag
+      # - name: Build packages
+      #   shell: bash
+      #   run: |
+      #     rattler-build build --recipe surfa --recipe samseg --recipe pygpc --recipe cgal-cpp --recipe fmm3dpy \
+      #       --variant-config conda_build_config.yaml --skip-existing=all --experimental \
+      #       -c conda-forge -c https://prefix.dev/vcubiomag
 
-      - name: Upload packages
-        shell: bash
-        run: |
-          for pkg in $(find output -type f \( -name "*.conda" -o -name "*.tar.bz2" \) ); do
-            echo "Uploading ${pkg}"
-            rattler-build upload prefix -c vcubiomag "${pkg}"
-          done
+      # - name: Upload packages
+      #   shell: bash
+      #   run: |
+      #     for pkg in $(find output -type f \( -name "*.conda" -o -name "*.tar.bz2" \) ); do
+      #       echo "Uploading ${pkg}"
+      #       rattler-build upload prefix -c vcubiomag "${pkg}"
+      #     done
