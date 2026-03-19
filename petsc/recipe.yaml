@@ -22,7 +22,9 @@ outputs:
       build:
         - ${{ compiler('c') }}
         - ${{ compiler('cxx') }}
-        - ${{ compiler('fortran') }}
+        - if: win
+          then: ifx_win-64
+          else: ${{ compiler('fortran') }}
         - make
         - cmake
         - pkg-config

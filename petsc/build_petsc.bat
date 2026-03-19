@@ -1,84 +1,51 @@
-@echo off
 setlocal enabledelayedexpansion
 
-set PETSC_DIR=%SRC_DIR%
-set PETSC_ARCH=arch-conda-c-opt
+:: =============================================================================
+:: PETSc Windows Build Launcher
+::
+:: This script locates a Cygwin installation and delegates the actual build to
+:: build_petsc_win.sh running under Cygwin bash. PETSc's configure script
+:: requires a Unix environment which Cygwin provides. The compiled output is
+:: native Windows (.lib/.dll) with no Cygwin dependency.
+::
+:: Cygwin detection order:
+::   1. CYGWIN_ROOT environment variable (set by CI or user)
+::   2. C:\cygwin64 (default 64-bit install)
+::   3. C:\cygwin (default 32-bit install)
+:: =============================================================================
 
-:: Hypre is only available for real scalar type
-set with_hypre=1
-if "%scalar%"=="complex" set with_hypre=0
-
-python configure ^
-  --with-cc="win32fe cl" ^
-  --with-cxx="win32fe cl" ^
-  --with-fc="win32fe ifx" ^
-  --with-fortran-bindings=0 ^
-  --COPTFLAGS="-O2" ^
-  --CXXOPTFLAGS="-O2" ^
-  --FOPTFLAGS="-O2" ^
-  --with-clib-autodetect=0 ^
-  --with-cxxlib-autodetect=0 ^
-  --with-fortranlib-autodetect=0 ^
-  --with-debugging=0 ^
-  --with-shared-libraries=1 ^
-  --with-ssl=0 ^
-  --with-x=0 ^
-  --with-scalar-type=%scalar% ^
-  --with-mpi=1 ^
-  --with-openmp=1 ^
-  --with-blaslapack-dir=%LIBRARY_PREFIX% ^
-  --with-mkl_pardiso=1 ^
-  --with-yaml=1 ^
-  --with-hwloc=1 ^
-  --with-hypre=%with_hypre% ^
-  --with-metis=1 ^
-  --with-ptscotch=1 ^
-  --with-suitesparse=1 ^
-  --with-suitesparse-dir=%LIBRARY_PREFIX% ^
-  --with-hdf5=0 ^
-  --with-fftw=0 ^
-  --with-parmetis=0 ^
-  --with-scalapack=0 ^
-  --with-mumps=0 ^
-  --with-superlu=0 ^
-  --with-superlu_dist=0 ^
-  --with-cuda=0 ^
-  --with-make-exec=make ^
-  --prefix=%LIBRARY_PREFIX% || (type configure.log && exit /b 1)
-
-make MAKE_NP=%CPU_COUNT%
-if errorlevel 1 exit /b 1
-
-make install
-if errorlevel 1 exit /b 1
-
-:: Cleanup
-del /q %LIBRARY_PREFIX%\lib\petsc\conf\configure-hash 2>nul
-
-:: Remove .pyc files
-for /r "%LIBRARY_PREFIX%\lib\petsc" %%f in (*.pyc) do del /q "%%f"
-
-:: Strip non-deterministic content (timestamps, machine info) from installed files
-:: to ensure reproducible package hashes across builds.
-if exist "%LIBRARY_PREFIX%\include\petscmachineinfo.h" (
-  echo Stripping petscmachineinfo.h
-  echo static const char *petscmachineinfo = "";> "%LIBRARY_PREFIX%\include\petscmachineinfo.h"
+:: Locate Cygwin installation
+:: Use separate if statements to avoid cmd.exe issues with chained else-if blocks
+set "CYGWIN_DIR=%CYGWIN_ROOT%"
+if "%CYGWIN_DIR%"=="" if exist "C:\cygwin64\bin\bash.exe" set "CYGWIN_DIR=C:\cygwin64"
+if "%CYGWIN_DIR%"=="" if exist "C:\cygwin\bin\bash.exe" set "CYGWIN_DIR=C:\cygwin"
+if "%CYGWIN_DIR%"=="" (
+    echo ERROR: Cygwin not found. Set CYGWIN_ROOT or install to C:\cygwin64
+    echo Get it at https://www.cygwin.com/ ^(include the python3 package^)
+    exit /b 1
 )
-if exist "%LIBRARY_PREFIX%\include\petscconfiginfo.h" (
-  echo Stripping petscconfiginfo.h
-  echo static const char *petscconfigureruntime = "";> "%LIBRARY_PREFIX%\include\petscconfiginfo.h"
+if not exist "%CYGWIN_DIR%\bin\bash.exe" (
+    echo ERROR: bash.exe not found at %CYGWIN_DIR%\bin\bash.exe
+    echo CYGWIN_ROOT may be set incorrectly: %CYGWIN_DIR%
+    exit /b 1
 )
 
-:: Remove reconfigure scripts (contain build-specific paths and timestamps)
-del /q %LIBRARY_PREFIX%\lib\petsc\conf\reconfigure-*.py 2>nul
+echo !pre!
 
-:: Remove build prefix references from installed files
-powershell -Command "Get-ChildItem -Path '%LIBRARY_PREFIX%\lib\petsc' -Recurse -File | ForEach-Object { $c = Get-Content $_.FullName -Raw -ErrorAction SilentlyContinue; if ($c -and $c.Contains('%BUILD_PREFIX%')) { $c.Replace('%BUILD_PREFIX%\Library\bin\', '').Replace('%BUILD_PREFIX%', '%LIBRARY_PREFIX%') | Set-Content $_.FullName -NoNewline } }"
-powershell -Command "if (Test-Path '%LIBRARY_PREFIX%\lib\pkgconfig\PETSc.pc') { (Get-Content '%LIBRARY_PREFIX%\lib\pkgconfig\PETSc.pc' -Raw).Replace('%BUILD_PREFIX%', '%LIBRARY_PREFIX%') | Set-Content '%LIBRARY_PREFIX%\lib\pkgconfig\PETSc.pc' -NoNewline }"
+@REM set "_ENV_FILE=!SRC_DIR!\_build_env.sh"
+@REM echo export SRC_DIR='!SRC_DIR!'> "!_ENV_FILE!"
+@REM echo export PREFIX='!PREFIX!'>> "!_ENV_FILE!"
+@REM echo export LIBRARY_PREFIX='!LIBRARY_PREFIX!'>> "!_ENV_FILE!"
+@REM echo export BUILD_PREFIX='!BUILD_PREFIX!'>> "!_ENV_FILE!"
+@REM echo export RECIPE_DIR='!RECIPE_DIR!'>> "!_ENV_FILE!"
+@REM echo export CPU_COUNT='!CPU_COUNT!'>> "!_ENV_FILE!"
+@REM echo export scalar='!scalar!'>> "!_ENV_FILE!"
+@REM echo export WIN_LIB='!LIB!'>> "!_ENV_FILE!"
+@REM echo export WIN_INCLUDE='!INCLUDE!'>> "!_ENV_FILE!"
+@REM echo export WIN_PATH='!PATH!'>> "!_ENV_FILE!"
 
-:: Replace absolute path to build python in headers
-powershell -Command "Get-ChildItem -Path '%LIBRARY_PREFIX%\include' -Filter 'petsc*.h' -File | ForEach-Object { $c = Get-Content $_.FullName -Raw -ErrorAction SilentlyContinue; if ($c -and $c.Contains('%BUILD_PREFIX%')) { $c.Replace('%BUILD_PREFIX%', '%LIBRARY_PREFIX%') | Set-Content $_.FullName -NoNewline } }"
-
-:: Remove example and data files
-if exist %LIBRARY_PREFIX%\share\petsc\examples\src rmdir /s /q %LIBRARY_PREFIX%\share\petsc\examples\src
-if exist %LIBRARY_PREFIX%\share\petsc\datafiles rmdir /s /q %LIBRARY_PREFIX%\share\petsc\datafiles
+:: Launch the build script under Cygwin bash.
+:: --norc --noprofile: avoid loading Cygwin shell profiles that could modify PATH
+:: and hide the conda build environment's tools and compilers.
+"!CYGWIN_DIR!\bin\bash.exe" --norc --noprofile "!RECIPE_DIR!\build_petsc_win.sh"
+if errorlevel 1 exit /b 1

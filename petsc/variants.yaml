@@ -15,14 +15,3 @@ mpi:
 scalar:
   - real
   - complex
-
-fortran_compiler:
-  - if: unix
-    then: gfortran
-  - if: win
-    then: ifx
-fortran_compiler_version:
-  - if: unix
-    then: 14
-  - if: win
-    then: 2025

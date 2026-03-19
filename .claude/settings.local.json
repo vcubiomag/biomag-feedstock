@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:*)",
+      "WebSearch",
+      "WebFetch(domain:petsc.org)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(find /c/Users/achan/Developer/research/vcubiomag/biomag-feedstock -name *.patch -o -name meta.yaml -o -name build.sh)",
+      "WebFetch(domain:tschoonj.github.io)",
+      "WebFetch(domain:www.oliversherouse.com)",
+      "Bash(find /c/Users/achan/Developer/research/vcubiomag/biomag-feedstock -maxdepth 2 -type f -name *.md -o -name CLAUDE.md)",
+      "Bash(ls -la /c/Users/achan/Developer/research/vcubiomag/biomag-feedstock/*.yaml /c/Users/achan/Developer/research/vcubiomag/biomag-feedstock/*.md)",
+      "Bash(find c:UsersachanDeveloperresearchvcubiomagbiomag-feedstockoutputsrc_cache -name win32fe* -type f)",
+      "Read(//c//**)",
+      "Read(//c/tools/**)",
+      "Bash(cmd.exe //c \"call build_env.bat && C:\\\\cygwin64\\\\bin\\\\bash.exe --norc --noprofile C:\\\\Users\\\\achan\\\\Developer\\\\research\\\\vcubiomag\\\\biomag-feedstock\\\\petsc\\\\build_petsc_win.sh\")",
+      "Bash(cmd.exe //c \"call conda_build.bat\")",
+      "Bash(cmd //c \"conda_build.bat\")",
+      "Bash(cmd.exe /c \"cd /d C:\\\\Users\\\\achan\\\\Developer\\\\research\\\\vcubiomag\\\\biomag-feedstock\\\\output\\\\bld\\\\rattler-build_petsc_1773865601\\\\work && conda_build.bat\")",
+      "Bash(C:/cygwin64/bin/bash.exe --norc --noprofile -c \"echo hello from cygwin; echo PATH=$PATH | head -c 200\")",
+      "Bash(export SRC_DIR=\"C:\\\\Users\\\\achan\\\\Developer\\\\research\\\\vcubiomag\\\\biomag-feedstock\\\\output\\\\bld\\\\rattler-build_petsc_1773865601\\\\work\")",
+      "Bash(export RECIPE_DIR=\"C:\\\\Users\\\\achan\\\\Developer\\\\research\\\\vcubiomag\\\\biomag-feedstock\\\\petsc\")",
+      "Bash(C:/cygwin64/bin/bash.exe --norc --noprofile -c \"echo SRC_DIR=$SRC_DIR; echo RECIPE_DIR=$RECIPE_DIR; cygpath -u \"\"$SRC_DIR\"\"; cygpath -u \"\"$RECIPE_DIR\"\"\")",
+      "Bash(export SRC_DIR=\"C:\\\\Users\\\\achan\\\\Developer\\\\research\\\\vcubiomag\\\\biomag-feedstock\\\\output\\\\bld\\\\rattler-build_petsc_1773865601\\\\work\" PREFIX=\"C:\\\\Users\\\\achan\\\\Developer\\\\research\\\\vcubiomag\\\\biomag-feedstock\\\\output\\\\bld\\\\rattler-build_petsc_1773865601\\\\h_env\" LIBRARY_PREFIX=\"C:\\\\Users\\\\achan\\\\Developer\\\\research\\\\vcubiomag\\\\biomag-feedstock\\\\output\\\\bld\\\\rattler-build_petsc_1773865601\\\\h_env\\\\Library\" BUILD_PREFIX=\"C:\\\\Users\\\\achan\\\\Developer\\\\research\\\\vcubiomag\\\\biomag-feedstock\\\\output\\\\bld\\\\rattler-build_petsc_1773865601\\\\build_env\" RECIPE_DIR=\"C:\\\\Users\\\\achan\\\\Developer\\\\research\\\\vcubiomag\\\\biomag-feedstock\\\\petsc\" CPU_COUNT=12 scalar=real mpi=msmpi)",
+      "Bash(C:/cygwin64/bin/bash.exe --norc --noprofile \"C:\\\\Users\\\\achan\\\\Developer\\\\research\\\\vcubiomag\\\\biomag-feedstock\\\\petsc\\\\build_petsc_win.sh\")"
+    ]
+  }
+}
