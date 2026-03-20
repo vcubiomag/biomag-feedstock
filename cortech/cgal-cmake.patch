@@ -2,11 +2,20 @@ diff --git a/meson.build b/meson.build
 index 0000000..0000001 100644
 --- a/meson.build
 +++ b/meson.build
+@@ -7,7 +7,7 @@ project(
+     default_options: [
+         'buildtype=debugoptimized',
+         'b_ndebug=if-release',
+-        # 'c_std=c99',
++        'cpp_std=c++17',
+         # 'cpp_std=c++14',
+     ],
+ )
 @@ -93,7 +93,8 @@ numpy_include = include_directories(incdir_numpy)
 
  numpy_dep = declare_dependency(include_directories: numpy_include)
 -cgal_dep = dependency('cgal', version: '>= 6.0')
-+eigen_dep = dependency('eigen3')
++eigen_dep = dependency('Eigen3', method: 'cmake', modules: ['Eigen3::Eigen'])
 +cgal_dep = declare_dependency(dependencies: [dependency('CGAL', method: 'cmake'), eigen_dep])
  # ceres_dep = dependency('ceres-solver', version: '>= 2.2')
  # files = ['3RD-PARTY.md', 'LICENSE.txt', 'README.md']
