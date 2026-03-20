@@ -11,14 +11,14 @@ jobs:
     strategy:
       matrix:
         include:
-          # - os: ubuntu-latest
-          #   target-platform: linux-64
+          - os: ubuntu-latest
+            target-platform: linux-64
           - os: windows-latest
             target-platform: win-64
-          # - os: macos-15
-          #   target-platform: osx-arm64
-          # - os: macos-15-intel
-          #   target-platform: osx-64
+          - os: macos-15
+            target-platform: osx-arm64
+          - os: macos-15-intel
+            target-platform: osx-64
       fail-fast: false
 
     name: Build (${{ matrix.target-platform }})
@@ -58,8 +58,17 @@ jobs:
       - name: Build packages
         shell: bash
         run: |
-          rattler-build build --recipe surfa --recipe samseg --recipe pygpc --recipe cgal-cpp --recipe fmm3dpy \
-            --variant-config conda_build_config.yaml --skip-existing=all --experimental \
+          rattler-build build \
+            --recipe surfa \
+            --recipe samseg \
+            --recipe pygpc \
+            --recipe cgal-cpp \
+            --recipe cortech \
+            --recipe brainsynth \
+            --recipe brainnet \
+            --variant-config conda_build_config.yaml \
+            --skip-existing=all \
+            --experimental \
             -c conda-forge -c https://prefix.dev/vcubiomag
 
       - name: Upload packages
