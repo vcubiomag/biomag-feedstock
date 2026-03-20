@@ -13,6 +13,8 @@ source:
 build:
   number: 0
   script:
+    - if: win
+      then: set "AR=lib" && set "LIB=%BUILD_PREFIX%\Library\lib\clang\22\lib\x86_64-pc-windows-msvc;%LIB%"
     - ${{ PYTHON }} -m pip install . --no-deps -vv
 
 requirements:
