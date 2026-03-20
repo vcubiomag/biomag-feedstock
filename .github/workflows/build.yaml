@@ -39,7 +39,7 @@ jobs:
             --recipe samseg \
             --recipe pygpc \
             --recipe cgal-cpp \
-            --recipe fmm3dpy
+            --recipe fmm3dpy \
             --recipe cortech \
             --variant-config conda_build_config.yaml \
             --skip-existing=all \
