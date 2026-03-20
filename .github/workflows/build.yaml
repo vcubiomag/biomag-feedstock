@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-upload:
+  build-base-arch:
     strategy:
       matrix:
         include:
@@ -20,35 +20,11 @@ jobs:
           - os: macos-15-intel
             target-platform: osx-64
       fail-fast: false
-
-    name: Build (${{ matrix.target-platform }})
+    name: Build Base Packages (${{ matrix.target-platform }})
     runs-on: ${{ matrix.os }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
-
-      # - name: Setup ifort Compiler
-      #   uses: fortran-lang/setup-fortran@v1
-      #   if: runner.os == 'Windows'
-      #   with:
-      #     compiler: intel-classic
-      #     version: '2021.10'
-
-      # - name: Setup Cygwin
-      #   id: setup-cygwin
-      #   uses: cygwin/cygwin-install-action@v6
-      #   if: runner.os == 'Windows'
-      #   with:
-      #     packages: |
-      #       python3
-      #       make
-      #     install-dir: 'C:\cygwin64'
-      #     add-to-path: 'false'
-
-      # - name: Set Cygwin Root
-      #   if: runner.os == 'Windows'
-      #   shell: bash
-      #   run: echo "CYGWIN_ROOT=${{ steps.setup-cygwin.outputs.root }}" >> $GITHUB_ENV
 
       - name: Setup rattler-build
         uses: prefix-dev/rattler-build-action@v0.2.36
@@ -64,11 +40,8 @@ jobs:
             --recipe pygpc \
             --recipe cgal-cpp \
             --recipe cortech \
-            --recipe brainsynth \
-            --recipe brainnet \
             --variant-config conda_build_config.yaml \
             --skip-existing=all \
-            --experimental \
             -c conda-forge -c https://prefix.dev/vcubiomag
 
       - name: Upload packages
@@ -78,3 +51,101 @@ jobs:
             echo "Uploading ${pkg}"
             rattler-build upload prefix -c vcubiomag "${pkg}"
           done
+
+  build-noarch:
+    name: Build noarch packages
+    needs: build-base-arch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Setup rattler-build
+        uses: prefix-dev/rattler-build-action@v0.2.36
+        with:
+          setup-only: true
+
+      - name: Build noarch packages
+        shell: bash
+        run: |
+          rattler-build build \
+            --recipe brainsynth \
+            --recipe brainnet \
+            --variant-config conda_build_config.yaml \
+            --skip-existing=all \
+            -c conda-forge -c https://prefix.dev/vcubiomag
+
+      - name: Upload noarch packages
+        shell: bash
+        run: |
+          for pkg in $(find output -type f \( -name "*.conda" -o -name "*.tar.bz2" \)); do
+            echo "Uploading ${pkg}"
+            rattler-build upload prefix -c vcubiomag "${pkg}"
+          done
+
+  # build-simnibs-arch:
+  #   needs: build-noarch
+  #   strategy:
+  #     matrix:
+  #       include:
+  #         - os: ubuntu-latest
+  #           target-platform: linux-64
+  #         - os: windows-latest
+  #           target-platform: win-64
+  #         - os: macos-15
+  #           target-platform: osx-arm64
+  #         - os: macos-15-intel
+  #           target-platform: osx-64
+  #     fail-fast: false
+  #   name: Build Simnibs Arch (${{ matrix.target-platform }})
+  #   runs-on: ${{ matrix.os }}
+  #   steps:
+  #     - name: Check out repository
+  #       uses: actions/checkout@v6
+
+  #     # - name: Setup ifort Compiler
+  #     #   uses: fortran-lang/setup-fortran@v1
+  #     #   if: runner.os == 'Windows'
+  #     #   with:
+  #     #     compiler: intel-classic
+  #     #     version: '2021.10'
+
+  #     # - name: Setup Cygwin
+  #     #   id: setup-cygwin
+  #     #   uses: cygwin/cygwin-install-action@v6
+  #     #   if: runner.os == 'Windows'
+  #     #   with:
+  #     #     packages: |
+  #     #       python3
+  #     #       make
+  #     #     install-dir: 'C:\cygwin64'
+  #     #     add-to-path: 'false'
+
+  #     # - name: Set Cygwin Root
+  #     #   if: runner.os == 'Windows'
+  #     #   shell: bash
+  #     #   run: echo "CYGWIN_ROOT=${{ steps.setup-cygwin.outputs.root }}" >> $GITHUB_ENV
+
+  #     - name: Setup rattler-build
+  #       uses: prefix-dev/rattler-build-action@v0.2.36
+  #       with:
+  #         setup-only: true
+
+  #     - name: Build packages
+  #       shell: bash
+  #       run: |
+  #         rattler-build build \
+  #           --recipe hypre \
+  #           --recipe petsc \
+  #           --variant-config conda_build_config.yaml \
+  #           --skip-existing=all \
+  #           --experimental \
+  #           -c conda-forge -c https://prefix.dev/vcubiomag
+
+  #     - name: Upload packages
+  #       shell: bash
+  #       run: |
+  #         for pkg in $(find output -type f \( -name "*.conda" -o -name "*.tar.bz2" \) ); do
+  #           echo "Uploading ${pkg}"
+  #           rattler-build upload prefix -c vcubiomag "${pkg}"
+  #         done
