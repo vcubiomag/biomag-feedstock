@@ -1,0 +1,35 @@
+context:
+  name: brainnet
+  version: 0.2
+
+package:
+  name: ${{ name }}
+  version: ${{ version }}
+
+source:
+  git: https://github.com/simnibs/brainnet
+  rev: "1ee2c2d3dfc47db43b69078c5ce051ba65a99b07"
+
+build:
+  noarch: python 
+  script: ${{ PYTHON }} -m pip install . -v --no-deps --no-build-isolation
+
+requirements:
+  host:
+    - python
+    - pip
+    - setuptools
+  run:
+    - pytorch
+    - pytorch-ignite
+    - packaging
+    - nibabel
+    - brainsynth
+    - cortech
+    - tqdm
+    - numpy
+
+tests:
+  - python:
+      imports:
+        - brainnet
