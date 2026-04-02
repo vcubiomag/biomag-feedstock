@@ -43,7 +43,7 @@ jobs:
             --recipe cortech \
             --variant-config conda_build_config.yaml \
             --skip-existing=all \
-            -c conda-forge -c https://prefix.dev/vcubiomag
+            -c https://prefix.dev/vcubiomag -c conda-forge
 
       - name: Upload packages
         shell: bash
@@ -74,7 +74,7 @@ jobs:
             --recipe brainnet \
             --variant-config conda_build_config.yaml \
             --skip-existing=all \
-            -c conda-forge -c https://prefix.dev/vcubiomag
+            -c https://prefix.dev/vcubiomag -c conda-forge
 
       - name: Upload noarch packages
         shell: bash
@@ -142,7 +142,7 @@ jobs:
             --variant-config conda_build_config.yaml \
             --skip-existing=all \
             --experimental \
-            -c conda-forge -c https://prefix.dev/vcubiomag
+            -c https://prefix.dev/vcubiomag -c conda-forge
 
       - name: Upload packages
         shell: bash
