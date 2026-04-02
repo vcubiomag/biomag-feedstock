@@ -1,0 +1,65 @@
+context:
+  name: simnibs
+  version: 4.6.0
+
+package:
+  name: ${{ name }}
+  version: ${{ version }}
+
+source:
+  git: https://github.com/vcubiomag/simnibs.git
+  rev: "1321600fd9ee92e9b4608336b4260aaba19ee291"
+
+build:
+  skip: win
+  script:
+    - ${{ PYTHON }} -m pip install . --no-deps -vv
+
+requirements:
+  build:
+    - ${{ compiler('c') }}
+    - ${{ compiler('cxx') }}
+  host:
+    - python
+    - pip
+    - scikit-build-core
+    - numpy >=2.0.0
+    - cython
+    - cgal-cpp >=5.6.3,<6
+    - tbb-devel >=2022.3.0,<2023
+    - eigen
+  run:
+    - python
+    - numpy
+    - cgal-cpp >=5.6.3,<6
+    - tbb-devel >=2022.3.0,<2023
+    - eigen
+    - scipy
+    - h5py
+    - nibabel
+    - cortech >=0.1,<0.2
+    - python-mumps
+    - petsc4py
+    - jsonschema
+    - fmm3dpy >=2.1.0,<3
+    - pygpc >=0.4.4,<0.5
+    - samseg >=0.6a0.dev0,<0.6a1
+    - pytorch
+    - brainnet >=0.2,<0.3
+    - numba
+    - requests
+    - gmsh
+
+tests:
+  - python:
+      imports:
+        - simnibs
+  - script:
+      - pytest -v tests
+    files:
+      source:
+        - tests/
+    requirements:
+      run:
+        - pytest
+        - mock

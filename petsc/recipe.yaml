@@ -77,7 +77,7 @@ outputs:
     build:
       number: ${{ build }}
       string: ${{ build_prefix }}_h${{ hash }}_${{ build }}
-      skip: osx
+      skip: osx or win
       variant:
         down_prioritize_variant: ${{ 1 if scalar == "complex" else 0 }}
       files:
@@ -98,7 +98,7 @@ outputs:
     inherit: petsc-build
     build:
       number: ${{ build }}
-      skip: osx
+      skip: osx or win
       script:
         - if: unix
           then: export PETSC_DIR=$PREFIX
