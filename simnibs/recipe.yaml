@@ -26,13 +26,13 @@ requirements:
     - numpy >=2.0.0
     - cython
     - cgal-cpp >=5.6.3,<6
-    - tbb-devel >=2022.3.0,<2023
+    - tbb-devel
     - eigen
   run:
     - python
     - numpy
     - cgal-cpp >=5.6.3,<6
-    - tbb-devel >=2022.3.0,<2023
+    - tbb-devel
     - eigen
     - scipy
     - h5py
@@ -40,6 +40,7 @@ requirements:
     - cortech >=0.1,<0.2
     - python-mumps
     - petsc4py
+    - petsc * mkl_*
     - jsonschema
     - fmm3dpy >=2.1.0,<3
     - pygpc >=0.4.4,<0.5
