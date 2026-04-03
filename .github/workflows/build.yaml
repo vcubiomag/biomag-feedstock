@@ -138,7 +138,6 @@ jobs:
           rattler-build build \
             --recipe hypre \
             --recipe petsc \
-            --recipe simnibs \
             --variant-config conda_build_config.yaml \
             --skip-existing=all \
             --experimental \
