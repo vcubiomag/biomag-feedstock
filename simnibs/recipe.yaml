@@ -26,13 +26,13 @@ requirements:
     - numpy >=2.0.0
     - cython
     - cgal-cpp >=5.6.3,<6
-    - tbb-devel
+    - tbb-devel >=2021,<2022
     - eigen
   run:
     - python
     - numpy
     - cgal-cpp >=5.6.3,<6
-    - tbb-devel
+    - tbb-devel >=2021,<2022
     - eigen
     - scipy
     - h5py
