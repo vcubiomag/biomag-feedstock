@@ -125,6 +125,7 @@ outputs:
         - numpy >=2.0.0
         - ${{ mpi }}
         - ${{ pin_subpackage('petsc', upper_bound='x.x') }}
+        - petsc * ${{ build_prefix }}_*
       run:
         - python
         - numpy

@@ -40,7 +40,8 @@ requirements:
     - cortech >=0.1,<0.2
     - python-mumps
     - petsc4py
-    - petsc * mkl_*
+    - if: linux or win
+      then: petsc * mkl_real_*
     - jsonschema
     - fmm3dpy >=2.1.0,<3
     - pygpc >=0.4.4,<0.5
