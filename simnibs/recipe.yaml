@@ -8,7 +8,7 @@ package:
 
 source:
   git: https://github.com/vcubiomag/simnibs.git
-  rev: "e6853ce0fea4728afd3ef906b736ee64499953e7"
+  rev: "06a9d565cfdeecaf5120518bc4db494d79ef6afd"
 
 build:
   skip: win
@@ -25,13 +25,13 @@ requirements:
     - scikit-build-core
     - numpy >=2.0.0
     - cython
-    - cgal-cpp >=5.6.3,<6
+    - cgal-cpp
     - tbb-devel >=2021,<2022
     - eigen
   run:
     - python
     - numpy
-    - cgal-cpp >=5.6.3,<6
+    - cgal-cpp
     - tbb-devel >=2021,<2022
     - eigen
     - scipy
