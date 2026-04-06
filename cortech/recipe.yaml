@@ -15,6 +15,7 @@ source:
 
 build:
   number: 0
+  skip: match(python, "<3.11")
   script:
     - ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
 
@@ -26,7 +27,7 @@ requirements:
     - cmake
     - pkg-config
   host:
-    - python >=3.11
+    - python
     - pip
     - meson-python
     - cython >=3.0
@@ -34,7 +35,7 @@ requirements:
     - cgal-cpp >=6.0.0
     - eigen
   run:
-    - python >=3.11
+    - python
     - numpy
     - scipy
     - nibabel
