@@ -1,9 +1,11 @@
+schema_version: 1
+
 context:
   name: surfa
-  version: 0.6.4.dev0
+  version: "0.6.4.dev0"
 
 package:
-  name: ${{ name }}
+  name: surfa
   version: ${{ version }}
 
 source:

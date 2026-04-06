@@ -1,32 +1,33 @@
+schema_version: 1
+
 context:
-  name: fmm3dpy
-  version: 2.1.0
+  version: "2.1.0"
 
 package:
-  name: ${{ name }}
+  name: fmm3dpy
   version: ${{ version }}
 
 source:
-  git: https://github.com/vcubiomag/FMM3D.git
-  rev: "314cff1a99966a568fb71a1f4ba4124a741cfc4e"
+  url: https://pypi.org/packages/source/f/fmm3dpy/fmm3dpy-${{ version }}.tar.gz
+  sha256: b2de0767fd59c8e7d82c7c624699903f6a902a895ef48407fa444068c939e790
 
 build:
   number: 0
   script:
     - if: win
-      then: set "AR=lib" && set "LIB=%BUILD_PREFIX%\Library\lib\clang\22\lib\x86_64-pc-windows-msvc;%LIB%"
-    - ${{ PYTHON }} -m pip install . --no-deps -vv
+      then: set "AR=lib" && for /d %%d in ("%BUILD_PREFIX%\Library\lib\clang\*") do set "LIB=%%d\lib\x86_64-pc-windows-msvc;%LIB%"
+    - ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
 
 requirements:
   build:
     - ${{ compiler('c') }}
-    - ${{ compiler('cxx') }}
+    - ${{ stdlib('c') }}
     - ${{ compiler('fortran') }}
   host:
     - python
-    - pip
     - meson-python
     - numpy >=2.0.0
+    - pip
   run:
     - python
     - numpy
@@ -35,6 +36,7 @@ tests:
   - python:
       imports:
         - fmm3dpy
+      pip_check: true
   - script:
       - pytest -s python/test
     files:
@@ -42,11 +44,19 @@ tests:
         - python/test/
     requirements:
       run:
+        - pip
         - pytest
 
 about:
   homepage: https://github.com/flatironinstitute/FMM3D
-  license: Apache-2.0
-  summary: This package contains basic routines for Laplace, Helmholtz, Stokes and Maxwell fast multipole methods in three dimensions
   repository: https://github.com/flatironinstitute/FMM3D
   documentation: https://fmm3d.readthedocs.io/en/latest/
+  summary: This package contains basic routines for Laplace, Helmholtz, Stokes and Maxwell fast multipole methods in three dimensions
+  license: Apache-2.0
+  license_file:
+    - LICENSE
+    - julia/LICENSE
+
+extra:
+  recipe-maintainers:
+    - srimanachanta

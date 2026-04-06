@@ -1,9 +1,10 @@
+schema_version: 1
+
 context:
-  name: brainnet
-  version: 0.2
+  version: "0.2"
 
 package:
-  name: ${{ name }}
+  name: brainnet
   version: ${{ version }}
 
 source:
@@ -11,8 +12,9 @@ source:
   rev: "1ee2c2d3dfc47db43b69078c5ce051ba65a99b07"
 
 build:
+  number: 0
   noarch: python 
-  script: ${{ PYTHON }} -m pip install . -v --no-deps --no-build-isolation
+  script: ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
 
 requirements:
   host:

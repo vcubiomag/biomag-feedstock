@@ -21,6 +21,7 @@ outputs:
     requirements:
       build:
         - ${{ compiler('c') }}
+        - ${{ stdlib('c') }}
         - ${{ compiler('cxx') }}
         - if: win
           then: ifx_win-64
@@ -105,7 +106,7 @@ outputs:
           else: set PETSC_DIR=%LIBRARY_PREFIX%
         - cd src/binding/petsc4py
         - ${{ PYTHON }} conf/cythonize.py
-        - ${{ PYTHON }} -m pip install . --no-deps -vv
+        - ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
     requirements:
       build:
         - ${{ compiler('c') }}

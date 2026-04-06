@@ -1,9 +1,10 @@
+schema_version: 1
+
 context:
-  name: simnibs
-  version: 4.6.0
+  version: "4.6.0"
 
 package:
-  name: ${{ name }}
+  name: simnibs
   version: ${{ version }}
 
 source:
@@ -13,7 +14,7 @@ source:
 build:
   skip: win
   script:
-    - ${{ PYTHON }} -m pip install . --no-deps -vv
+    - ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
 
 requirements:
   build:
@@ -25,32 +26,33 @@ requirements:
     - scikit-build-core
     - numpy >=2.0.0
     - cython
-    - cgal-cpp
-    - tbb-devel >=2021,<2022
-    - eigen
+    - cgal-cpp >=6,<7
+    - tbb-devel >=2022.3.0,<2023
+    - eigen >=5.0.1,<6
   run:
     - python
-    - numpy
-    - cgal-cpp
-    - tbb-devel >=2021,<2022
-    - eigen
-    - scipy
-    - h5py
-    - nibabel
+    - numpy >=2.4.3,<3
+    - cgal-cpp >=6,<7
+    - tbb-devel >=2022.3.0,<2023
+    - eigen >=5.0.1,<6
+    - scipy >=1.17.1,<2
+    - h5py >=3.15.1,<4
+    - nibabel >=5.4.0,<6
     - cortech >=0.1,<0.2
-    - python-mumps
-    - petsc4py
+    - python-mumps >=0.0.6,<0.0.7
+    - petsc4py >=3.24.4,<4
+    - mpich
     - if: linux or win
       then: petsc * mkl_real_*
-    - jsonschema
+    - jsonschema >=4.26.0,<5
     - fmm3dpy >=2.1.0,<3
     - pygpc >=0.4.4,<0.5
     - samseg >=0.6a0.dev0,<0.6a1
-    - pytorch
+    - pytorch >=2.10.0,<3
     - brainnet >=0.2,<0.3
-    - numba
-    - requests
-    - gmsh
+    - numba >=0.64.0,<0.65
+    - requests >=2.32.5,<3
+    - gmsh >=4.15.0,<5
 
 tests:
   - python:

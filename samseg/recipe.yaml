@@ -1,10 +1,10 @@
+schema_version: 1
+
 context:
-  name: samseg
-  version: 0.6a0.dev0
-  build: 0
+  version: "0.6a0.dev0"
 
 package:
-  name: ${{ name }}
+  name: samseg
   version: ${{ version }}
 
 source:
@@ -12,14 +12,13 @@ source:
   rev: "d11d9fafcc2def6f387443d7ba8e80a44a4425f6"
 
 build:
-  number: ${{ build|int + (microarch_level|int) * 100 }}
+  number: 0
   script:
-    - ${{ PYTHON }} -m pip install . --no-deps -vv
+    - ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
 
 requirements:
   build:
-    - if: microarch_level|int > 0
-      then: x86_64-microarch-level ==${{ microarch_level }}
+    - ${{ stdlib('c') }}
     - ${{ compiler('cxx') }}
     - cmake
   host:

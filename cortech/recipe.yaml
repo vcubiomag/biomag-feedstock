@@ -1,16 +1,17 @@
+schema_version: 1
+
 context:
-  name: cortech
-  version: 0.1
+  version: "0.1"
 
 package:
-  name: ${{ name }}
+  name: cortech
   version: ${{ version }}
 
 source:
   git: https://github.com/simnibs/cortech
   rev: "312bc736c013b050ca4c1f0f53e10d7e380f403a"
   patches:
-    - cgal-cmake.patch
+    - patches/cgal-cmake.patch
 
 build:
   number: 0
@@ -20,11 +21,12 @@ build:
 requirements:
   build:
     - ${{ compiler('c') }}
+    - ${{ stdlib('c') }}
     - ${{ compiler('cxx') }}
     - cmake
     - pkg-config
   host:
-    - python
+    - python >=3.11
     - pip
     - meson-python
     - cython >=3.0
@@ -32,7 +34,7 @@ requirements:
     - cgal-cpp >=6.0.0
     - eigen
   run:
-    - python
+    - python >=3.11
     - numpy
     - scipy
     - nibabel
