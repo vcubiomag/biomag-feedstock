@@ -26,6 +26,29 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v6
 
+      - name: Setup ifort Compiler
+        uses: fortran-lang/setup-fortran@v1
+        if: runner.os == 'Windows'
+        with:
+          compiler: intel-classic
+          version: '2021.10'
+
+      - name: Setup Cygwin
+        id: setup-cygwin
+        uses: cygwin/cygwin-install-action@v6
+        if: runner.os == 'Windows'
+        with:
+          packages: |
+            python3
+            make
+          install-dir: 'C:\cygwin64'
+          add-to-path: 'false'
+
+      - name: Set Cygwin Root
+        if: runner.os == 'Windows'
+        shell: bash
+        run: echo "CYGWIN_ROOT=${{ steps.setup-cygwin.outputs.root }}" >> $GITHUB_ENV
+
       - name: Setup rattler-build
         uses: prefix-dev/rattler-build-action@v0.2.36
         with:
@@ -40,6 +63,8 @@ jobs:
             --recipe pygpc \
             --recipe fmm3dpy \
             --recipe cortech \
+            --recipe hypre \
+            --recipe petsc \
             --experimental \
             --variant-config conda_build_config.yaml \
             --skip-existing=all \
@@ -104,47 +129,24 @@ jobs:
   #     - name: Check out repository
   #       uses: actions/checkout@v6
 
-      # - name: Setup ifort Compiler
-      #   uses: fortran-lang/setup-fortran@v1
-      #   if: runner.os == 'Windows'
-      #   with:
-      #     compiler: intel-classic
-      #     version: '2021.10'
+  #     - name: Setup rattler-build
+  #       uses: prefix-dev/rattler-build-action@v0.2.36
+  #       with:
+  #         setup-only: true
 
-      # - name: Setup Cygwin
-      #   id: setup-cygwin
-      #   uses: cygwin/cygwin-install-action@v6
-      #   if: runner.os == 'Windows'
-      #   with:
-      #     packages: |
-      #       python3
-      #       make
-      #     install-dir: 'C:\cygwin64'
-      #     add-to-path: 'false'
+  #     - name: Build packages
+  #       shell: bash
+  #       run: |
+  #         rattler-build build \
+  #           --recipe simnibs \
+  #           --variant-config conda_build_config.yaml \
+  #           --skip-existing=all \
+  #           -c https://prefix.dev/vcubiomag -c conda-forge
 
-      # - name: Set Cygwin Root
-      #   if: runner.os == 'Windows'
-      #   shell: bash
-      #   run: echo "CYGWIN_ROOT=${{ steps.setup-cygwin.outputs.root }}" >> $GITHUB_ENV
-
-      # - name: Setup rattler-build
-      #   uses: prefix-dev/rattler-build-action@v0.2.36
-      #   with:
-      #     setup-only: true
-
-      # - name: Build packages
-      #   shell: bash
-      #   run: |
-      #     rattler-build build \
-      #       --recipe simnibs \
-      #       --variant-config conda_build_config.yaml \
-      #       --skip-existing=all \
-      #       -c https://prefix.dev/vcubiomag -c conda-forge
-
-      # - name: Upload packages
-      #   shell: bash
-      #   run: |
-      #     for pkg in $(find output -type f \( -name "*.conda" -o -name "*.tar.bz2" \) ); do
-      #       echo "Uploading ${pkg}"
-      #       rattler-build upload prefix -c vcubiomag "${pkg}"
-      #     done
+  #     - name: Upload packages
+  #       shell: bash
+  #       run: |
+  #         for pkg in $(find output -type f \( -name "*.conda" -o -name "*.tar.bz2" \) ); do
+  #           echo "Uploading ${pkg}"
+  #           rattler-build upload prefix -c vcubiomag "${pkg}"
+  #         done

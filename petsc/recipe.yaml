@@ -2,7 +2,7 @@ schema_version: 1
 
 context:
   name: petsc
-  version: "3.24.5"
+  version: "3.25.0"
   build: 0
   mpi: ${{ mpi | default('mpich') }}
   scalar: ${{ scalar | default('real') }}

@@ -775,7 +775,7 @@ mkl_devel:
 mpg123:
   - '1.32'
 mpich:
-  - 4
+  - 5
 mpfr:
   - 4
 mppp:
@@ -831,7 +831,7 @@ openjpeg:
 openjph:
   - '0.26'
 openmpi:
-  - 4
+  - 5
 openslide:
   - 4
 # although openssl follows SemVer for ABI/API stability, we stay on
