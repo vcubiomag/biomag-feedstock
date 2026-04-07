@@ -12,13 +12,14 @@ source:
   rev: "06a9d565cfdeecaf5120518bc4db494d79ef6afd"
 
 build:
-  skip: win
+  skip: win or match(python, "<3.11")
   script:
     - ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
 
 requirements:
   build:
     - ${{ compiler('c') }}
+    - ${{ stdlib('c') }}
     - ${{ compiler('cxx') }}
   host:
     - python
