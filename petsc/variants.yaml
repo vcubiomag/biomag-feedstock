@@ -8,4 +8,5 @@ mpi:
 
 scalar:
   - real
-  - complex
+  - if: unix
+    then: complex
