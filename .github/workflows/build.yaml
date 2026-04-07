@@ -40,7 +40,6 @@ jobs:
             --recipe pygpc \
             --recipe fmm3dpy \
             --recipe cortech \
-            --recipe petsc \
             --experimental \
             --variant-config conda_build_config.yaml \
             --skip-existing=all \
