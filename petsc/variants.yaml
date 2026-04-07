@@ -1,12 +1,7 @@
 mpi:
-  - if: unix
-    then:
-      - mpich
-      - openmpi
-  - if: win
-    then: msmpi
+  - mpich
+  - openmpi
 
 scalar:
   - real
-  - if: unix
-    then: complex
+  - complex
