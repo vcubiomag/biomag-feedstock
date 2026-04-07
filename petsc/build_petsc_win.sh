@@ -4,119 +4,112 @@ set -ex
 # =============================================================================
 # PETSc Windows Build Script (runs under Cygwin)
 #
-# This script is invoked by build_petsc.bat under Cygwin bash.
-# Cygwin provides the Unix environment required by PETSc's configure script.
-# The actual compilation uses native Windows compilers via PETSc's win32fe
-# wrappers, so the output .lib/.dll files have zero Cygwin dependency.
+# Invoked by build_petsc.bat under Cygwin bash. Cygwin provides the Unix
+# environment PETSc's configure requires. Actual compilation uses native
+# Windows compilers via PETSc's win32fe wrappers, so the output DLLs/LIBs
+# have zero Cygwin runtime dependency.
 # =============================================================================
 
-# --- Path conversion ---------------------------------------------------------
-# rattler-build sets env vars in Windows format (C:\...). Convert to Cygwin
-# paths for configure, and save originals for post-processing sed replacements.
+# --- Environment capture -----------------------------------------------------
+# Cygwin inherits Windows env vars from the parent cmd.exe process.
+# Save Windows-format values before any conversion -- needed for post-install
+# sed replacements that must match paths as PETSc wrote them.
 
-# Ensure Cygwin utilities are available before anything else
 export PATH="/usr/bin:$PATH"
 
-env | grep -i "user"
-
-exit
-
-
-
-# Source the environment file written by build_petsc.bat.
-# Cygwin bash does not reliably inherit Windows environment variables, so the
-# bat file exports them to _build_env.sh in the working directory.
-_env_file="$(pwd)/_build_env.sh"
-if [ -f "$_env_file" ]; then
-    # Strip Windows carriage returns before sourcing
-    sed -i 's/\r$//' "$_env_file"
-    source "$_env_file"
-else
-    echo "WARNING: $_env_file not found, relying on inherited environment"
-fi
-
-# Save Windows-format paths before conversion
 WIN_SRC_DIR="$SRC_DIR"
 WIN_PREFIX="$PREFIX"
 WIN_LIBRARY_PREFIX="$LIBRARY_PREFIX"
 WIN_BUILD_PREFIX="$BUILD_PREFIX"
 
-# Convert to Cygwin paths
-# Note: avoid cygpath -ms (short 8.3 names) as PETSc configure compares
-# PETSC_DIR against os.getcwd() which returns long paths — they must match.
+# --- Path conversion ---------------------------------------------------------
+# cygpath -u: Unix format (/cygdrive/c/...)  -- for shell operations
+# cygpath -m: Mixed format (C:/...)          -- for compiler/configure args
+# Avoid cygpath -ms (short 8.3 names) as PETSc compares PETSC_DIR against
+# os.getcwd() which returns long paths.
+
 export SRC_DIR=$(cygpath -u "$SRC_DIR")
 export PREFIX=$(cygpath -u "$PREFIX")
 export LIBRARY_PREFIX=$(cygpath -u "$LIBRARY_PREFIX")
 export BUILD_PREFIX=$(cygpath -u "$BUILD_PREFIX")
 export RECIPE_DIR=$(cygpath -u "$RECIPE_DIR")
 
-# Mixed paths (C:/...) — PETSc may also write paths in this format
-MIX_BUILD_PREFIX=$(cygpath -m "$WIN_BUILD_PREFIX")
 MIX_LIBRARY_PREFIX=$(cygpath -m "$WIN_LIBRARY_PREFIX")
+MIX_BUILD_PREFIX=$(cygpath -m "$WIN_BUILD_PREFIX")
 
 # --- PATH setup --------------------------------------------------------------
-# Prepend PETSc win32fe directory so configure can find win32fe wrappers
-# Keep the inherited Windows PATH for native compilers and conda build tools
-export PATH="/usr/bin:$SRC_DIR/lib/petsc/bin/win32fe:$PATH"
+# Prepend win32fe wrappers so PETSc configure finds them when given --with-cc=cl
+export PATH="$SRC_DIR/lib/petsc/bin/win32fe:/usr/bin:$PATH"
 
-# Restore Windows compiler environment variables (LIB, INCLUDE) so that
-# MSVC's link.exe and Intel's ifx can find runtime libraries like ifconsol.lib.
-# Replace any unexpanded %PREFIX% / %BUILD_PREFIX% references with actual values.
-if [ -n "$WIN_LIB" ]; then
-    WIN_LIB="${WIN_LIB//'%PREFIX%'/$WIN_PREFIX}"
-    WIN_LIB="${WIN_LIB//'%BUILD_PREFIX%'/$WIN_BUILD_PREFIX}"
-    export LIB="$WIN_LIB"
+# --- LIB / INCLUDE -----------------------------------------------------------
+# These are inherited from cmd.exe in Windows format (semicolon-separated).
+# MSVC cl.exe and ifort read them natively. Expand any literal %PREFIX%
+# references that conda activation may have left unexpanded.
+
+if [ -n "$LIB" ]; then
+    LIB="${LIB//'%PREFIX%'/$WIN_PREFIX}"
+    LIB="${LIB//'%LIBRARY_PREFIX%'/$WIN_LIBRARY_PREFIX}"
+    LIB="${LIB//'%BUILD_PREFIX%'/$WIN_BUILD_PREFIX}"
+    export LIB
 fi
-if [ -n "$WIN_INCLUDE" ]; then
-    WIN_INCLUDE="${WIN_INCLUDE//'%PREFIX%'/$WIN_PREFIX}"
-    WIN_INCLUDE="${WIN_INCLUDE//'%BUILD_PREFIX%'/$WIN_BUILD_PREFIX}"
-    export INCLUDE="$WIN_INCLUDE"
+if [ -n "$INCLUDE" ]; then
+    INCLUDE="${INCLUDE//'%PREFIX%'/$WIN_PREFIX}"
+    INCLUDE="${INCLUDE//'%LIBRARY_PREFIX%'/$WIN_LIBRARY_PREFIX}"
+    INCLUDE="${INCLUDE//'%BUILD_PREFIX%'/$WIN_BUILD_PREFIX}"
+    export INCLUDE
 fi
 
-# Find Intel Fortran runtime libraries (ifconsol.lib) and add to LIB.
-# The ifx conda package may place these in the build prefix or elsewhere.
-IFX_LIB_DIR=""
-for search_dir in "$WIN_BUILD_PREFIX" "$WIN_PREFIX" "C:\\Program Files (x86)\\Intel\\oneAPI"; do
-    found=$(find "$(cygpath -u "$search_dir")" -name "ifconsol.lib" 2>/dev/null | head -1)
+# --- Intel Fortran runtime libraries -----------------------------------------
+# ifort needs its runtime libs (ifconsol.lib, libifcoremd.lib, etc.) on the
+# LIB path for linking. Search common installation locations.
+
+IFORT_LIB_DIR=""
+for search_root in \
+    "C:\\Program Files (x86)\\Intel\\oneAPI" \
+    "C:\\Program Files\\Intel\\oneAPI" \
+    "$WIN_BUILD_PREFIX"; do
+    found=$(find "$(cygpath -u "$search_root")" -name "ifconsol.lib" 2>/dev/null | head -1)
     if [ -n "$found" ]; then
-        IFX_LIB_DIR=$(cygpath -w "$(dirname "$found")")
+        IFORT_LIB_DIR=$(cygpath -w "$(dirname "$found")")
         break
     fi
 done
-if [ -n "$IFX_LIB_DIR" ]; then
-    echo "Found Intel Fortran libraries at: $IFX_LIB_DIR"
-    export LIB="${LIB};${IFX_LIB_DIR}"
+
+if [ -n "$IFORT_LIB_DIR" ]; then
+    echo "Found Intel Fortran runtime libraries at: $IFORT_LIB_DIR"
+    export LIB="${LIB};${IFORT_LIB_DIR}"
 else
-    echo "WARNING: ifconsol.lib not found — Fortran linking may fail"
+    echo "ERROR: ifconsol.lib not found -- Fortran linking will fail"
+    exit 1
 fi
 
-# Hide Cygwin's link which conflicts with MSVC's link.exe (the linker).
-# Cygwin's link is a Unix hard-link utility whose output causes PETSc's
-# compiler checks to fail. Rename it so MSVC's linker is found instead.
+# --- Hide Cygwin link.exe ----------------------------------------------------
+# Cygwin's /usr/bin/link.exe is a Unix hard-link utility. MSVC's link.exe is
+# the Windows linker. PETSc's win32fe must find MSVC's version.
+
 for f in /usr/bin/link /usr/bin/link.exe; do
     if [ -f "$f" ]; then
-        mv "$f" "${f}.cygwin"
+        mv "$f" "${f}.cygwin_hidden"
     fi
 done
 
-# --- Configure ---------------------------------------------------------------
+# --- Configure ----------------------------------------------------------------
 export PETSC_DIR=$SRC_DIR
 export PETSC_ARCH=arch-conda-c-opt
 
-# Hypre is only available for real scalar type
-with_hypre=1
 if [[ "${scalar}" == "complex" ]]; then
     with_hypre=0
+else
+    with_hypre=1
 fi
 
-# Use Cygwin python to run PETSc configure.
-# PETSc's chkcygwinwindowscompilers() auto-expands --with-cc=cl to the full
-# win32fe_cl path. The --ignore-cygwin-link flag avoids the Cygwin link.exe
-# vs MSVC link.exe conflict check.
+# PETSc auto-expands --with-cc=cl to win32fe_cl.
+# Mixed-format paths (C:/...) are used for --prefix and --with-*-dir args
+# because win32fe can handle them and they produce cleaner installed paths.
 /usr/bin/python3 ./configure \
     --with-cc=cl \
     --with-cxx=cl \
-    --with-fc=ifx \
+    --with-fc=ifort \
     --with-fortran-bindings=0 \
     --COPTFLAGS="-O2" \
     --CXXOPTFLAGS="-O2" \
@@ -130,16 +123,17 @@ fi
     --with-x=0 \
     --with-scalar-type=${scalar} \
     --with-mpi=1 \
+    --with-mpi-dir="${MIX_LIBRARY_PREFIX}" \
     --with-openmp=1 \
-    --with-blaslapack-dir=${LIBRARY_PREFIX} \
+    --with-blaslapack-dir="${MIX_LIBRARY_PREFIX}" \
     --with-mkl_pardiso=1 \
-    --with-yaml=1 \
-    --with-hwloc=1 \
     --with-hypre=${with_hypre} \
-    --with-metis=1 \
-    --with-ptscotch=1 \
-    --with-suitesparse=1 \
-    --with-suitesparse-dir=${LIBRARY_PREFIX} \
+    --with-hypre-dir="${MIX_LIBRARY_PREFIX}" \
+    --with-yaml=0 \
+    --with-hwloc=0 \
+    --with-metis=0 \
+    --with-ptscotch=0 \
+    --with-suitesparse=0 \
     --with-hdf5=0 \
     --with-fftw=0 \
     --with-parmetis=0 \
@@ -150,36 +144,34 @@ fi
     --with-cuda=0 \
     --with-make-exec=/usr/bin/make \
     --ignore-cygwin-link \
-    --prefix=${LIBRARY_PREFIX} || (cat configure.log && exit 1)
+    --prefix="${MIX_LIBRARY_PREFIX}" \
+    || (cat configure.log && exit 1)
 
-# --- Build -------------------------------------------------------------------
-make MAKE_NP=${CPU_COUNT}
-make install
+# --- Build --------------------------------------------------------------------
+/usr/bin/make MAKE_NP=${CPU_COUNT}
+/usr/bin/make install
 
 # --- Post-processing ---------------------------------------------------------
-# Clean up build artifacts and strip non-deterministic content to ensure
-# reproducible package hashes across builds.
 
 rm -f ${LIBRARY_PREFIX}/lib/petsc/conf/configure-hash
 find ${LIBRARY_PREFIX}/lib/petsc -name '*.pyc' -delete
 
-# Strip non-deterministic content (timestamps, machine info) from headers
+# Strip non-deterministic content (timestamps, machine info)
 if [ -f "${LIBRARY_PREFIX}/include/petscmachineinfo.h" ]; then
-    echo "Stripping petscmachineinfo.h"
     echo 'static const char *petscmachineinfo = "";' > "${LIBRARY_PREFIX}/include/petscmachineinfo.h"
 fi
 if [ -f "${LIBRARY_PREFIX}/include/petscconfiginfo.h" ]; then
-    echo "Stripping petscconfiginfo.h"
     echo 'static const char *petscconfigureruntime = "";' > "${LIBRARY_PREFIX}/include/petscconfiginfo.h"
 fi
 
-# Remove reconfigure scripts (contain build-specific paths and timestamps)
 rm -f ${LIBRARY_PREFIX}/lib/petsc/conf/reconfigure-*.py
 
-# Replace build prefix references in installed files.
-# PETSc configure under Cygwin may write paths in Cygwin (/cygdrive/c/...),
+# Fix build-prefix references in installed files.
+# PETSc under Cygwin may write paths in Cygwin (/cygdrive/c/...),
 # mixed (C:/...), or Windows (C:\...) format. Handle all variants.
-for f in $(grep -rle "${BUILD_PREFIX}\|${MIX_BUILD_PREFIX}" "${LIBRARY_PREFIX}/lib/petsc" 2>/dev/null) \
+WIN_BUILD_PREFIX_FWD=$(echo "$WIN_BUILD_PREFIX" | tr '\\' '/')
+for f in $(grep -rle "${BUILD_PREFIX}\|${MIX_BUILD_PREFIX}\|${WIN_BUILD_PREFIX_FWD}" \
+           "${LIBRARY_PREFIX}/lib/petsc" 2>/dev/null) \
          "${LIBRARY_PREFIX}/lib/pkgconfig/PETSc.pc"; do
     [ -f "$f" ] || continue
     echo "Fixing build prefix references in $f"
@@ -188,20 +180,27 @@ for f in $(grep -rle "${BUILD_PREFIX}\|${MIX_BUILD_PREFIX}" "${LIBRARY_PREFIX}/l
         -e "s|${MIX_BUILD_PREFIX}/Library/bin/||g" \
         -e "s|${BUILD_PREFIX}|${LIBRARY_PREFIX}|g" \
         -e "s|${MIX_BUILD_PREFIX}|${MIX_LIBRARY_PREFIX}|g" \
+        -e "s|${WIN_BUILD_PREFIX_FWD}|${MIX_LIBRARY_PREFIX}|g" \
         "$f"
 done
 
-# Fix build prefix references in headers
-for f in $(grep -rle "${BUILD_PREFIX}\|${MIX_BUILD_PREFIX}" "${LIBRARY_PREFIX}/include" 2>/dev/null); do
+for f in $(grep -rle "${BUILD_PREFIX}\|${MIX_BUILD_PREFIX}\|${WIN_BUILD_PREFIX_FWD}" \
+           "${LIBRARY_PREFIX}/include" 2>/dev/null); do
     echo "Fixing build prefix in header $f"
     sed -i'' \
         -e "s|${BUILD_PREFIX}|${LIBRARY_PREFIX}|g" \
         -e "s|${MIX_BUILD_PREFIX}|${MIX_LIBRARY_PREFIX}|g" \
+        -e "s|${WIN_BUILD_PREFIX_FWD}|${MIX_LIBRARY_PREFIX}|g" \
         "$f"
 done
 
-# Remove example and data files
-echo "Removing example files"
 rm -rf ${LIBRARY_PREFIX}/share/petsc/examples/src
-echo "Removing data files"
 rm -rf ${LIBRARY_PREFIX}/share/petsc/datafiles
+
+# --- Cleanup ------------------------------------------------------------------
+# Restore Cygwin's link.exe (build env is ephemeral, but good practice)
+for f in /usr/bin/link.cygwin_hidden /usr/bin/link.exe.cygwin_hidden; do
+    if [ -f "$f" ]; then
+        mv "$f" "${f%.cygwin_hidden}"
+    fi
+done

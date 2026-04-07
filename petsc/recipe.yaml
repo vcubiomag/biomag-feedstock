@@ -23,39 +23,37 @@ outputs:
         - ${{ compiler('c') }}
         - ${{ stdlib('c') }}
         - ${{ compiler('cxx') }}
-        - if: win
-          then: ifx_win-64
-          else: ${{ compiler('fortran') }}
-        - make
-        - cmake
-        - pkg-config
-        - python 3.12.*
         - if: unix
           then:
+            - ${{ compiler('fortran') }}
+            - make
+            - cmake
+            - pkg-config
+            - python 3.12.*
             - bison
             - diffutils
             - gnuconfig
-        - if: mpi == 'openmpi' and build_platform != target_platform
-          then: ${{ mpi }}
+            - if: mpi == 'openmpi' and build_platform != target_platform
+              then: ${{ mpi }}
       host:
         - ${{ mpi }}
         - mkl-devel
-        - yaml
         - if: scalar == 'real'
           then:
             - hypre
-        - libhwloc
-        - metis
-        - libptscotch
-        - libscotch
-        - libscotch * int32_*
-        - libamd
-        - libcholmod
-        - libklu
-        - libspqr
-        - libumfpack
         - if: unix
           then:
+            - yaml
+            - libhwloc
+            - metis
+            - libptscotch
+            - libscotch
+            - libscotch * int32_*
+            - libamd
+            - libcholmod
+            - libklu
+            - libspqr
+            - libumfpack
             - parmetis
             - scalapack
             - mumps-mpi
@@ -78,7 +76,7 @@ outputs:
     build:
       number: ${{ build }}
       string: ${{ build_prefix }}_h${{ hash }}_${{ build }}
-      skip: osx or win
+      skip: unix
       variant:
         down_prioritize_variant: ${{ 1 if scalar == "complex" else 0 }}
       files:
@@ -99,7 +97,7 @@ outputs:
     inherit: petsc-build
     build:
       number: ${{ build }}
-      skip: osx or win
+      skip: unix
       script:
         - if: unix
           then: export PETSC_DIR=$PREFIX
