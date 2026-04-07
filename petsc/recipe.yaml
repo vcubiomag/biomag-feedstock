@@ -20,11 +20,11 @@ outputs:
       name: petsc-build
     requirements:
       build:
-        - ${{ compiler('c') }}
-        - ${{ stdlib('c') }}
-        - ${{ compiler('cxx') }}
         - if: unix
           then:
+            - ${{ compiler('c') }}
+            - ${{ stdlib('c') }}
+            - ${{ compiler('cxx') }}
             - ${{ compiler('fortran') }}
             - make
             - cmake

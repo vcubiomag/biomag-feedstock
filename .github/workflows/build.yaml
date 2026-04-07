@@ -39,7 +39,7 @@ jobs:
         if: runner.os == 'Windows'
         with:
           packages: |
-            python3
+            python312
             make
           install-dir: 'C:\cygwin64'
           add-to-path: 'false'
