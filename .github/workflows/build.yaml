@@ -63,7 +63,6 @@ jobs:
             --recipe pygpc \
             --recipe fmm3dpy \
             --recipe cortech \
-            --recipe hypre \
             --recipe petsc \
             --experimental \
             --variant-config conda_build_config.yaml \
