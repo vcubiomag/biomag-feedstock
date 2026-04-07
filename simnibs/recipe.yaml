@@ -9,7 +9,7 @@ package:
 
 source:
   git: https://github.com/vcubiomag/simnibs.git
-  rev: "06a9d565cfdeecaf5120518bc4db494d79ef6afd"
+  rev: "575b66996734c051be560836daeb666b4bc4ee9b"
 
 build:
   skip: win or match(python, "<3.11")
