@@ -31,6 +31,10 @@ set "INCLUDE=!INCLUDE:%%PREFIX%%=%PREFIX%!"
 set "INCLUDE=!INCLUDE:%%LIBRARY_PREFIX%%=%LIBRARY_PREFIX%!"
 set "INCLUDE=!INCLUDE:%%BUILD_PREFIX%%=%BUILD_PREFIX%!"
 
+:: Strip CRLF from the shell script. Git on Windows may check out .sh files
+:: with \r\n line endings which Cygwin bash cannot parse.
+"!CYGWIN_DIR!\bin\sed.exe" -i "s/\r$//" "!RECIPE_DIR!\build_petsc_win.sh"
+
 :: Launch the build under Cygwin bash.
 :: --norc --noprofile: avoid Cygwin shell profiles that could modify PATH
 :: and hide the conda build environment's tools and compilers.
