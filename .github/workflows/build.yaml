@@ -26,13 +26,6 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v6
 
-      # - name: Setup ifort Compiler
-      #   uses: fortran-lang/setup-fortran@v1
-      #   if: runner.os == 'Windows'
-      #   with:
-      #     compiler: intel-classic
-      #     version: '2021.10'
-
       # - name: Setup Cygwin
       #   id: setup-cygwin
       #   uses: cygwin/cygwin-install-action@v6
