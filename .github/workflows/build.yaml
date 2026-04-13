@@ -26,21 +26,21 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v6
 
-      # - name: Setup Cygwin
-      #   id: setup-cygwin
-      #   uses: cygwin/cygwin-install-action@v6
-      #   if: runner.os == 'Windows'
-      #   with:
-      #     packages: |
-      #       python312
-      #       make
-      #     install-dir: 'C:\cygwin64'
-      #     add-to-path: 'false'
+      - name: Setup Cygwin
+        id: setup-cygwin
+        uses: cygwin/cygwin-install-action@v6
+        if: runner.os == 'Windows'
+        with:
+          packages: |
+            python312
+            make
+          install-dir: 'C:\cygwin64'
+          add-to-path: 'false'
 
-      # - name: Set Cygwin Root
-      #   if: runner.os == 'Windows'
-      #   shell: bash
-      #   run: echo "CYGWIN_ROOT=${{ steps.setup-cygwin.outputs.root }}" >> $GITHUB_ENV
+      - name: Set Cygwin Root
+        if: runner.os == 'Windows'
+        shell: bash
+        run: echo "CYGWIN_ROOT=${{ steps.setup-cygwin.outputs.root }}" >> $GITHUB_ENV
 
       - name: Setup rattler-build
         uses: prefix-dev/rattler-build-action@v0.2.36
