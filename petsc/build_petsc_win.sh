@@ -52,94 +52,16 @@ python3 ./configure \
 
 # --- Post-configure fixups ---
 
-# Remove /usr/bin/python3 references (Cygwin python, not conda python)
-sed -i "s%/usr/bin/python3%python%g" $PETSC_ARCH/include/petscconf.h
-sed -i "s%/usr/bin/python3%python%g" $PETSC_ARCH/lib/petsc/conf/petscvariables
-
-# Replace absolute Cygwin install prefix path with ${PREFIX} in headers
-for f in $PETSC_ARCH/include/petsc*.h; do
-    if grep -q "${CYGWIN_LIBRARY_PREFIX}" "$f"; then
-        echo "Fixing ${CYGWIN_LIBRARY_PREFIX} in $f"
-        sed -i "s%${CYGWIN_LIBRARY_PREFIX}%\${PREFIX}%g" "$f"
-    fi
-done
-
-# Also fix Windows-style paths in petscconf.h (C:\\Users\\... form)
-# Convert install prefix to Windows backslash form for matching
-WIN_PREFIX_ESCAPED=$(cygpath -w "$CYGWIN_LIBRARY_PREFIX" | sed 's/\\/\\\\/g')
-if [ -n "$WIN_PREFIX_ESCAPED" ]; then
-    sed -i "s%${WIN_PREFIX_ESCAPED}%\\\${PREFIX}%g" $PETSC_ARCH/include/petscconf.h
-fi
-
-# Also fix Windows forward-slash paths (C:/Users/... form used in wPETSC_DIR)
-WIN_PREFIX_FWD=$(cygpath -m "$CYGWIN_LIBRARY_PREFIX")
-if [ -n "$WIN_PREFIX_FWD" ]; then
-    sed -i "s%${WIN_PREFIX_FWD}%\${PREFIX}%g" $PETSC_ARCH/lib/petsc/conf/petscvariables
-fi
-
-# Fix SRC_DIR/work paths (win32fe compiler wrapper references)
-for f in $PETSC_ARCH/include/petsc*.h; do
-    if grep -q "${CYGWIN_WORK}" "$f"; then
-        echo "Fixing ${CYGWIN_WORK} in $f"
-        sed -i "s%${CYGWIN_WORK}%\${PREFIX}%g" "$f"
-    fi
-done
-
 # --- Build and install ---
 make MAKE_NP=${CPU_COUNT}
 make install
 
-# Fix ${prefix} (unexpanded Makefile var) → ${wPETSC_DIR} in installed petscvariables.
-# petsc4py on Windows only resolves ${wPETSC_DIR}, not ${prefix}, so external lib paths
-# like ${prefix}/lib/msmpi.lib would expand to /lib/msmpi.lib (broken).
-sed -i "s%\${prefix}%\${wPETSC_DIR}%g" "${CYGWIN_LIBRARY_PREFIX}/lib/petsc/conf/petscvariables"
+# Remove /usr/bin/python3 references (Cygwin python, not conda python)
+sed -i "s%/usr/bin/python3%python%g" $CYGWIN_LIBRARY_PREFIX/include/petscconf.h
+sed -i "s%/usr/bin/python3%python%g" $CYGWIN_LIBRARY_PREFIX/lib/petsc/conf/petscvariables
 
-# --- Post-install path fixups for Windows native tool compatibility ---
-# The installed config files still contain Cygwin-style paths from the build.
-# Convert them so downstream consumers (petsc4py, pkg-config, etc.) work natively.
-
-# Replace Cygwin install-prefix paths in config files
-# Use ${wPETSC_DIR} for Makefile-parsed files, ${prefix} for pkg-config files
-for conf_file in "${CYGWIN_LIBRARY_PREFIX}/lib/petsc/conf/petscvariables" \
-                 "${CYGWIN_LIBRARY_PREFIX}/lib/petsc/conf/variables"; do
-    if [ -f "$conf_file" ]; then
-        echo "Fixing Cygwin paths in $conf_file"
-        sed -i "s%${CYGWIN_LIBRARY_PREFIX}%\${wPETSC_DIR}%g" "$conf_file"
-    fi
-done
-if [ -f "${CYGWIN_LIBRARY_PREFIX}/lib/pkgconfig/PETSc.pc" ]; then
-    echo "Fixing Cygwin paths in PETSc.pc"
-    sed -i "s%${CYGWIN_LIBRARY_PREFIX}%\${prefix}%g" "${CYGWIN_LIBRARY_PREFIX}/lib/pkgconfig/PETSc.pc"
-fi
-
-# Replace Cygwin tool paths with generic names (not available outside Cygwin)
-sed -i \
-    -e 's%/usr/bin/make%make%g' \
-    -e 's%/usr/bin/bash%bash%g' \
-    -e 's%/usr/bin/sed%sed%g' \
-    -e 's%/usr/bin/mkdir -p%mkdir%g' \
-    -e 's%/usr/bin/mv%mv%g' \
-    -e 's%/usr/bin/cp%cp%g' \
-    -e 's%/usr/bin/grep%grep%g' \
-    -e 's%/usr/bin/rm%rm%g' \
-    -e 's%/usr/bin/diff%diff%g' \
-    -e 's%/usr/bin/true%true%g' \
-    "${CYGWIN_LIBRARY_PREFIX}/lib/petsc/conf/petscvariables"
-
-# Fix PETSC_DIR in installed petscconf.h (contains hardcoded build-time path)
-WIN_LIBRARY_PREFIX=$(python3 -c "
-import re
-p = '${CYGWIN_LIBRARY_PREFIX}'
-m = re.match(r'/cygdrive/([a-zA-Z])/(.*)', p)
-if m:
-    print(m.group(1).upper() + ':\\\\\\\\' + m.group(2).replace('/', '\\\\\\\\'))
-else:
-    print(p.replace('/', '\\\\\\\\'))
-")
-if [ -n "$WIN_LIBRARY_PREFIX" ] && [ -f "${CYGWIN_LIBRARY_PREFIX}/include/petscconf.h" ]; then
-    echo "Fixing PETSC_DIR in installed petscconf.h"
-    sed -i "s%${WIN_LIBRARY_PREFIX}%\\\${PREFIX}%g" "${CYGWIN_LIBRARY_PREFIX}/include/petscconf.h"
-fi
+# Collapse double-backslash escapes to forward slashes for rattler-build detection
+sed -i 's|\\\\|/|g' "$CYGWIN_LIBRARY_PREFIX/include/petscconf.h"
 
 # Remove all Cygwin symlinks in the work directory that rattler-build cannot handle
 # PETSc creates various symlinks (configure.log, make.log, RDict.db, etc.)
@@ -165,15 +87,42 @@ fi
 # Remove reconfigure script (contains build-specific paths and timestamps)
 rm -f ${CYGWIN_LIBRARY_PREFIX}/lib/petsc/conf/reconfigure-*.py
 
-# Fix build prefix references in installed files
-# First strip win32fe wrapper paths to just the tool name
-for f in $(grep -rl "${CYGWIN_WORK}" "${CYGWIN_LIBRARY_PREFIX}/lib/petsc" 2>/dev/null) "${CYGWIN_LIBRARY_PREFIX}/lib/pkgconfig/PETSc.pc"; do
+for f in $(grep -rlI "${CYGWIN_WORK}/lib/petsc/bin/win32fe/" "${CYGWIN_LIBRARY_PREFIX}/lib/petsc" 2>/dev/null) "${CYGWIN_LIBRARY_PREFIX}/lib/pkgconfig/PETSc.pc"; do
     if [ -f "$f" ]; then
-        echo "Fixing work dir in $f"
+        echo "Fixing win32fe wrapper paths in $f"
+        grep "${CYGWIN_WORK}/lib/petsc/bin/win32fe/" "$f" || true
         sed -i "s%${CYGWIN_WORK}/lib/petsc/bin/win32fe/%%g" "$f"
-        sed -i "s%${CYGWIN_WORK}%\${PREFIX}%g" "$f"
     fi
 done
+
+for f in $(grep -rlI "${CYGWIN_WORK}" "${CYGWIN_LIBRARY_PREFIX}/lib/petsc" 2>/dev/null) "${CYGWIN_LIBRARY_PREFIX}/lib/pkgconfig/PETSc.pc"; do
+    if [ -f "$f" ]; then
+        echo "Fixing work dir in $f"
+        grep "${CYGWIN_WORK}" "$f" || true
+        sed -i "s%${CYGWIN_WORK}%${CYGWIN_LIBRARY_PREFIX}%g" "$f"
+    fi
+done
+
+# Convert all Cygwin paths to Windows forward-slash paths so rattler-build
+# can detect the prefix and insert relocatable placeholders.
+WIN_PREFIX=$(cygpath -m "$PREFIX")
+WIN_LIBRARY_PREFIX="${WIN_PREFIX}/Library"
+for f in $(grep -rlI "${CYGWIN_PREFIX}" "${CYGWIN_LIBRARY_PREFIX}" 2>/dev/null); do
+    if [ -f "$f" ]; then
+        echo "Fixing Cygwin paths in $f"
+        sed -i \
+            -e "s%${CYGWIN_LIBRARY_PREFIX}%${WIN_LIBRARY_PREFIX}%g" \
+            -e "s%${CYGWIN_PREFIX}%${WIN_PREFIX}%g" \
+            -e 's%/usr/bin/%%g' \
+            "$f"
+    fi
+done
+
+# Replace hardcoded Visual Studio cmake path with bare cmake
+sed -i 's%CMAKE = .*cmake.*%CMAKE = cmake%' "$CYGWIN_LIBRARY_PREFIX/lib/petsc/conf/petscvariables"
+
+# Convert wPETSC_DIR backslashes to forward slashes for rattler-build detection
+sed -i '/^wPETSC_DIR =/s|\\|/|g' "$CYGWIN_LIBRARY_PREFIX/lib/petsc/conf/petscvariables"
 
 # Create petsc.lib alias for libpetsc.lib
 # PETSc builds as libpetsc.lib (Unix convention) but setuptools on Windows
