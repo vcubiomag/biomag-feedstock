@@ -38,14 +38,14 @@ outputs:
       host:
         - ${{ mpi }}
         - mkl-devel
+        - yaml
+        - libhwloc
+        - metis
         - if: scalar == 'real'
           then:
             - hypre
         - if: unix
           then:
-            - yaml
-            - libhwloc
-            - metis
             - libptscotch
             - libscotch
             - libscotch * int32_*

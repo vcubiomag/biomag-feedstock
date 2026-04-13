@@ -36,16 +36,25 @@ python3 ./configure \
     --with-x=0 \
     --with-scalar-type=${scalar} \
     --with-mpi=1 \
-    --with-mpi-include="${CYGWIN_LIBRARY_PREFIX}/include" \
     --with-mpi-lib="${CYGWIN_LIBRARY_PREFIX}/lib/msmpi.lib" \
+    --with-mpi-include="${CYGWIN_LIBRARY_PREFIX}/include" \
     --with-blaslapack-lib="${CYGWIN_LIBRARY_PREFIX}/lib/mkl_rt.lib" \
     --with-blaslapack-include="${CYGWIN_LIBRARY_PREFIX}/include" \
     --with-mkl_pardiso=1 \
     --with-mkl_pardiso-lib="${CYGWIN_LIBRARY_PREFIX}/lib/mkl_rt.lib" \
     --with-mkl_pardiso-include="${CYGWIN_LIBRARY_PREFIX}/include" \
     --with-hypre=${with_hypre} \
-    --with-hypre-include="${CYGWIN_LIBRARY_PREFIX}/include" \
     --with-hypre-lib="${CYGWIN_LIBRARY_PREFIX}/lib/HYPRE.lib" \
+    --with-hypre-include="${CYGWIN_LIBRARY_PREFIX}/include" \
+    --with-yaml=1 \
+    --with-yaml-lib="${CYGWIN_LIBRARY_PREFIX}/lib/yaml.lib" \
+    --with-yaml-include="${CYGWIN_LIBRARY_PREFIX}/include" \
+    --with-hwloc=1 \
+    --with-hwloc-lib="${CYGWIN_LIBRARY_PREFIX}/lib/hwloc.lib" \
+    --with-hwloc-include="${CYGWIN_LIBRARY_PREFIX}/include" \
+    --with-metis=1 \
+    --with-metis-lib="${CYGWIN_LIBRARY_PREFIX}/lib/metis.lib" \
+    --with-metis-include="${CYGWIN_LIBRARY_PREFIX}/include" \
     --with-make-exec=/usr/bin/make \
     --ignore-cygwin-link \
     --prefix="${CYGWIN_LIBRARY_PREFIX}"
