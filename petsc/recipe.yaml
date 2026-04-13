@@ -96,20 +96,10 @@ outputs:
       name: petsc4py
     inherit: petsc-build
     build:
+      script:
+        file: build_petsc4py
       number: ${{ build }}
       skip: osx
-      script:
-        - if: unix
-          then:
-            - export PETSC_DIR=$PREFIX
-            - export PETSC_ARCH=arch-conda-c-opt
-          else:
-            - set PETSC_DIR=%LIBRARY_PREFIX%
-            - set PETSC_ARCH=arch-conda-c-opt
-            - set "CL=/Zc:preprocessor"
-        - cd src/binding/petsc4py
-        - ${{ PYTHON }} conf/cythonize.py
-        - ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
       files:
         exclude:
           - share/petsc/examples/
