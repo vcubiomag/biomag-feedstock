@@ -1,0 +1,57 @@
+schema_version: 1
+
+context:
+  version: "0.1"
+
+package:
+  name: cortech
+  version: ${{ version }}
+
+source:
+  git: https://github.com/simnibs/cortech
+  rev: "312bc736c013b050ca4c1f0f53e10d7e380f403a"
+  patches:
+    - patches/cgal-cmake.patch
+
+build:
+  number: 0
+  skip: match(python, "<3.11")
+  script:
+    - ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+
+requirements:
+  build:
+    - ${{ compiler('c') }}
+    - ${{ stdlib('c') }}
+    - ${{ compiler('cxx') }}
+    - cmake
+    - pkg-config
+  host:
+    - python
+    - pip
+    - meson-python
+    - cython >=3.0
+    - numpy >=2.0.0
+    - cgal-cpp >=6.0.0
+    - eigen
+  run:
+    - python
+    - numpy
+    - scipy
+    - nibabel
+    - numba
+    # - pyvista
+    - cgal-cpp
+
+tests:
+  - python:
+      imports:
+        - cortech
+  - script:
+      - pytest -s tests
+    files:
+      source:
+        - tests/
+    requirements:
+      run:
+        - pytest
