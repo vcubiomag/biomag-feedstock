@@ -1,0 +1,56 @@
+schema_version: 1
+
+context:
+  name: surfa
+  version: "0.6.4.dev0"
+
+package:
+  name: surfa
+  version: ${{ version }}
+
+source:
+  git: https://github.com/freesurfer/surfa
+  rev: "c6cddec65f3f3455c60e7954e630ef94368611ec"
+
+build:
+  number: 0
+  script:
+    - ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+
+requirements:
+  build:
+    - ${{ compiler('c') }}
+    - ${{ compiler('cxx') }}
+  host:
+    - python
+    - pip
+    - setuptools
+    - cython >=3.0
+    - numpy >=2.0.0
+  run:
+    - python
+    - numpy
+    - scipy
+    - nibabel >= 2.1
+    - pillow
+    - python-xxhash
+
+tests:
+  - python:
+      imports:
+        - surfa
+  - script:
+      - pytest -s test
+    files:
+      source:
+        - test/
+    requirements:
+      run:
+        - pytest
+
+about:
+  homepage: https://github.com/freesurfer/surfa
+  license: MIT
+  summary: Python utilities for medical image and surface-based analysis
+  repository: https://github.com/freesurfer/surfa
+  documentation: https://surfer.nmr.mgh.harvard.edu/docs/surfa/
