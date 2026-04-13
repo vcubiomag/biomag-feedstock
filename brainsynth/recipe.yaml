@@ -1,0 +1,33 @@
+schema_version: 1
+
+context:
+  version: "0.1"
+
+package:
+  name: brainsynth
+  version: ${{ version }}
+
+source:
+  git: https://github.com/simnibs/brainsynth
+  rev: "daaa07b7c3f83fa7b0a5563ec5c1fc6ed78a3b72"
+
+build:
+  noarch: python
+  number: 0
+  script: ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+
+requirements:
+  host:
+    - python
+    - pip
+    - setuptools
+  run:
+    - pytorch
+    - nibabel
+    - scipy
+    - numpy
+
+tests:
+  - python:
+      imports:
+        - brainsynth
