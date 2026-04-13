@@ -1,0 +1,75 @@
+schema_version: 1
+
+context:
+  version: "4.6.0"
+
+package:
+  name: simnibs
+  version: ${{ version }}
+
+source:
+  git: https://github.com/vcubiomag/simnibs.git
+  rev: "c136dcdf37f567c6e15b6cafcfd9ed4e7c749dab"
+
+build:
+  skip: match(python, "<3.11")
+  script:
+    - ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+
+requirements:
+  build:
+    - ${{ compiler('c') }}
+    - ${{ stdlib('c') }}
+    - ${{ compiler('cxx') }}
+  host:
+    - python
+    - pip
+    - scikit-build-core
+    - numpy >=2.0.0
+    - cython
+    - cgal-cpp >=6,<7
+    - tbb-devel
+    - eigen
+  run:
+    - python
+    - numpy
+    - cgal-cpp
+    - tbb-devel
+    - eigen
+    - scipy
+    - h5py
+    - nibabel
+    - cortech
+    - python-mumps
+    - petsc4py
+    - if: linux or win
+      then: petsc * mkl_real_*
+    - if: unix
+      then: mpich
+    - jsonschema
+    - fmm3dpy
+    - pygpc
+    - samseg
+    - pytorch
+    - brainnet
+    - numba
+    - requests
+    - pyqt
+    - pyopengl
+    - gmsh
+    - mpfr
+    - gmp
+
+tests:
+  - python:
+      imports:
+        - simnibs
+  - script:
+      - pytest -v tests
+    files:
+      source:
+        - tests/
+    requirements:
+      run:
+        - pytest
+        - mock
